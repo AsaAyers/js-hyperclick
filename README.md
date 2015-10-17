@@ -1,5 +1,18 @@
 # js-hyperclick package
 
-A short description of your package.
+This is a provider for [hyperclick][hyperclick] that lets you jump to where variables are defined.
 
-![A screenshot of your package](https://f.cloud.github.com/assets/69169/2290250/c35d867a-a017-11e3-86be-cd7c5bf3ff9b.gif)
+This project is going to replace [code-links][code-links].
+
+Current Features:
+
+* Jump to variable declaration
+
+![variables]( https://raw.githubusercontent.com/AsaAyers/js-hyperclick/master/screenshots/Selection_066.png)
+
+TODO:
+
+* Jump through `import` / `require`
+
+[hyperclick]: https://atom.io/packages/hyperclick
+[code-links]: https://atom.io/packages/code-links
