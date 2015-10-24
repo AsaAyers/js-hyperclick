@@ -10,9 +10,13 @@ Current Features:
 
 ![variables]( https://raw.githubusercontent.com/AsaAyers/js-hyperclick/master/screenshots/Selection_066.png)
 
-TODO:
-
 * Jump through `import` / `require`
+
+![imports]( https://raw.githubusercontent.com/AsaAyers/js-hyperclick/master/screenshots/Selection_102.png)
+
+* Node modules link to their documentation
+
+![node]( https://raw.githubusercontent.com/AsaAyers/js-hyperclick/master/screenshots/Selection_104.png)
 
 [hyperclick]: https://atom.io/packages/hyperclick
 [code-links]: https://atom.io/packages/code-links

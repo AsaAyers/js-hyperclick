@@ -3,8 +3,6 @@
 
 import { parseCode } from '../lib/make-cache.js'
 
-
-
 describe("makeCache.parseCode", function() {
 
     it("gathers the scopes for a file", function() {
