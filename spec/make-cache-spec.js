@@ -30,18 +30,21 @@ describe("makeCache.parseCode", function() {
         const badRequire = require(foo.name)
         const { bar } = require('./bar')
 
-        import someDefault, { named } from './other'
+        import someDefault, { named as renamed } from './other'
 
         `).externalModules
 
         expect(actual[0].name).toBe('foo')
         expect(actual[0].module).toBe('./foo')
+
         expect(actual[1].name).toBe('bar')
         expect(actual[1].module).toBe('./bar')
-        // expect(actual[2].name).toBe('someDefault')
-        // expect(actual[2].module).toBe('./other')
-        // expect(actual[3].name).toBe('named')
-        // expect(actual[3].module).toBe('./other')
+
+        expect(actual[2].name).toBe('someDefault')
+        expect(actual[2].module).toBe('./other')
+
+        expect(actual[3].name).toBe('renamed')
+        expect(actual[3].module).toBe('./other')
     })
 
 
