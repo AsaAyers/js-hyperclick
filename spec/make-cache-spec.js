@@ -32,6 +32,10 @@ describe("makeCache.parseCode", function() {
 
         import someDefault, { named as renamed } from './other'
 
+        function whatever() {
+            const x = require('something')
+        }
+
         `).externalModules
 
         expect(actual[0].name).toBe('foo')
@@ -45,6 +49,9 @@ describe("makeCache.parseCode", function() {
 
         expect(actual[3].name).toBe('renamed')
         expect(actual[3].module).toBe('./other')
+
+        expect(actual[4].name).toBe('x')
+        expect(actual[4].module).toBe('something')
     })
 
 
