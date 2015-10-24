@@ -30,7 +30,7 @@ describe("makeCache.parseCode", function() {
         const badRequire = require(foo.name)
         const { bar } = require('./bar')
 
-        import someDefault, { named as renamed } from './other'
+        import someDefault, { named as renamed, notRenamed } from './other'
 
         function whatever() {
             const x = require('something')
@@ -38,20 +38,51 @@ describe("makeCache.parseCode", function() {
 
         `).externalModules
 
-        expect(actual[0].name).toBe('foo')
-        expect(actual[0].module).toBe('./foo')
+        let id = 0
+        expect(actual[id].local).toBe('foo')
+        expect(actual[id].module).toBe('./foo')
+        expect(actual[id].imported).toBe('default')
 
-        expect(actual[1].name).toBe('bar')
-        expect(actual[1].module).toBe('./bar')
+        id++
+        expect(actual[id].local).toBe('bar')
+        expect(actual[id].module).toBe('./bar')
+        expect(actual[id].imported).toBe('default')
 
-        expect(actual[2].name).toBe('someDefault')
-        expect(actual[2].module).toBe('./other')
+        id++
+        expect(actual[id].local).toBe('someDefault')
+        expect(actual[id].module).toBe('./other')
+        expect(actual[id].imported).toBe('default')
 
-        expect(actual[3].name).toBe('renamed')
-        expect(actual[3].module).toBe('./other')
+        id++
+        expect(actual[id].local).toBe('renamed')
+        expect(actual[id].module).toBe('./other')
+        expect(actual[id].imported).toBe('named')
 
-        expect(actual[4].name).toBe('x')
-        expect(actual[4].module).toBe('something')
+        id++
+        expect(actual[id].local).toBe('notRenamed')
+        expect(actual[id].module).toBe('./other')
+        expect(actual[id].imported).toBe('notRenamed')
+
+        id++
+        expect(actual[id].local).toBe('x')
+        expect(actual[id].module).toBe('something')
+        expect(actual[id].imported).toBe('default')
+    })
+
+    it("Gathers exports", function() {
+        const actual = parseCode(`
+        export default function Something() {}
+        export { bar }
+        export { whatever as baz}
+        export const foo = 'foo'
+        `).exports
+
+        expect(actual.default).not.toBeUndefined()
+        expect(actual.bar).not.toBeUndefined()
+        expect(actual.whatever).toBeUndefined()
+        expect(actual.baz).not.toBeUndefined()
+        expect(actual.foo).not.toBeUndefined()
+
     })
 
 
