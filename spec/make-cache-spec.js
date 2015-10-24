@@ -75,6 +75,8 @@ describe("makeCache.parseCode", function() {
         export { bar }
         export { whatever as baz}
         export const foo = 'foo'
+
+        export function exportedFunction() {}
         `).exports
 
         expect(actual.default).not.toBeUndefined()
@@ -82,7 +84,15 @@ describe("makeCache.parseCode", function() {
         expect(actual.whatever).toBeUndefined()
         expect(actual.baz).not.toBeUndefined()
         expect(actual.foo).not.toBeUndefined()
+        expect(actual.exportedFunction).not.toBeUndefined()
+    })
 
+    it("Gathers module.exports", function() {
+        const actual = parseCode(`
+        module.exports = {}
+        `).exports
+
+        expect(actual.default).not.toBeUndefined()
     })
 
 
