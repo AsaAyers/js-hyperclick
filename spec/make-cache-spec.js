@@ -97,5 +97,24 @@ describe("makeCache.parseCode", function() {
         expect(actual.default).not.toBeUndefined()
     })
 
+    it("Gathers paths from imports / requires", function() {
+        const actual = parseCode(`
+        const foo = require('./foo')
+        const badRequire = require(foo.name)
+        const { bar } = require('./bar')
+
+        import someDefault, { named as renamed, notRenamed } from './other'
+
+        function whatever() {
+            const x = require('something')
+        }
+        `).paths
+
+        expect(actual[0].module).toBe('./foo')
+        expect(actual[1].module).toBe('./bar')
+        expect(actual[2].module).toBe('./other')
+        expect(actual[3].module).toBe('something')
+    })
+
 
 })
