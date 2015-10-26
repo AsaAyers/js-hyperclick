@@ -1,4 +1,7 @@
 ## `master`
+
+## 1.3.0
+* Allow linking to relative files that don't exist yet
 * Fixed #6 prevent throwing when a module doesn't resolve
 
 ## 1.2.0
