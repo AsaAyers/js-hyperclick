@@ -16,10 +16,14 @@ describe("makeCache.parseCode", function() {
             if (noop) {
                 // 4
             }
+
+            function foo() {
+                // 5
+            }
         }())
         `).scopes
 
-        expect(actual.length).toBe(4)
+        expect(actual.length).toBe(5)
     })
 
     it("Gathers requires", function() {
