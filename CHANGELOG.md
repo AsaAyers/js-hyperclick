@@ -1,3 +1,6 @@
+## `master`
+* Fixed #6 prevent throwing when a module doesn't resolve
+
 ## 1.2.0
 * Fixed #2 Make import/require paths into links
 
