@@ -1,3 +1,6 @@
+## 1.2.0
+* Fixed #2 Make import/require paths into links
+
 ## 1.1.5 - function declarations
 * Fixed #5: Function declaration parameters weren't linkable
 
