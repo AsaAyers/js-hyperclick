@@ -1,5 +1,8 @@
 ## `master`
 
+## 1.4.0
+* Add configuration for alternate file extensions. Use this to make `require(./foo)` pick up `./foo.jsx`
+
 ## 1.3.0
 * Allow linking to relative files that don't exist yet
 * Fixed #6 prevent throwing when a module doesn't resolve
