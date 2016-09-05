@@ -1,5 +1,10 @@
 ## `master`
 
+## 1.5.0
+* Add configuration to enable pending panes
+* Add configuration for custom module roots.
+  * This is configured in your `package.json` because it is project-specific.
+
 ## 1.4.0
 * Add configuration for alternate file extensions. Use this to make `require(./foo)` pick up `./foo.jsx`
 
