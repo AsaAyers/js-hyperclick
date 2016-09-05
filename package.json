@@ -16,6 +16,9 @@
       }
     }
   },
+  "moduleRoots": [
+      "lib"
+  ],
   "dependencies": {
     "acorn-to-esprima": "^1.0.4",
     "babel-core": "^5.8.25",
