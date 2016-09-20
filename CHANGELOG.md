@@ -1,5 +1,11 @@
 ## `master`
 
+## 1.6.0
+* Add path navigation for exports [#35](https://github.com/AsaAyers/js-hyperclick/pull/35)
+  * `export * from './foo';`
+  * `export { x, y } from './bar';`
+  * `export default from './baz'`
+
 ## 1.5.0
 * Add configuration to enable pending panes
 * Add configuration for custom module roots.
