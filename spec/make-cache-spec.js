@@ -108,12 +108,20 @@ describe("makeCache.parseCode", function() {
         function whatever() {
             const x = require('something')
         }
+
+        export * from './export-all'
+        export { y } from './named-exports'
+        export default from './base/Component.react'
+
         `).paths
 
         expect(actual[0].module).toBe('./foo')
         expect(actual[1].module).toBe('./bar')
         expect(actual[2].module).toBe('./other')
         expect(actual[3].module).toBe('something')
+        expect(actual[4].module).toBe('./export-all')
+        expect(actual[5].module).toBe('./named-exports')
+        expect(actual[6].module).toBe('./base/Component.react')
     })
 
 
