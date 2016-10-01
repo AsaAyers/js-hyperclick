@@ -1,5 +1,10 @@
 ## `master`
 
+## Next
+
+* Fixed #21 Improved startup time.
+  * TimeCop was reporting it took over 600ms to load on my machine. Now it's under 5ms to load.
+
 ## 1.7.0
 
 * Closed #34 Jump to import option
