@@ -1,5 +1,14 @@
 ## `master`
 
+## 1.7.0
+
+* Closed #34 Jump to import option
+  * Following an imported variable takes you to the import statement instead of leaving the current file. You can still use the import statement to navigate between files.
+
+## 1.6.2
+
+* Fixed #38 Fix support for identifiers containing a `$`
+
 ## 1.6.0
 * Add path navigation for exports [#35](https://github.com/AsaAyers/js-hyperclick/pull/35)
   * `export * from './foo';`
