@@ -1,5 +1,9 @@
 ## `master`
 
+## 1.8.1
+
+* Delay error notifications until the user clicks the link.
+
 ## 1.8.0
 
 * Show Atom Error Notifications when the file can't be parsed.
