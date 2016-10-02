@@ -6,7 +6,7 @@ import { parseCode } from '../lib/make-cache.js'
 describe("makeCache.parseCode", function() {
 
     it("gathers the scopes for a file", function() {
-        const actual = parseCode(`
+        const { parseError, scopes: actual } = parseCode(`
         // 1
         (function() {
             // 2
@@ -21,13 +21,14 @@ describe("makeCache.parseCode", function() {
                 // 5
             }
         }())
-        `).scopes
+        `)
+        if (parseError) throw parseError
 
         expect(actual.length).toBe(5)
     })
 
     it("Gathers requires", function() {
-        const actual = parseCode(`
+        const { parseError, externalModules: actual } = parseCode(`
         const foo = require('./foo')
         const badRequire = require(foo.name)
         const { bar } = require('./bar')
@@ -38,7 +39,8 @@ describe("makeCache.parseCode", function() {
             const x = require('something')
         }
 
-        `).externalModules
+        `)
+        if (parseError) throw parseError
 
         let id = 0
         expect(actual[id].local).toBe('foo')
@@ -72,14 +74,15 @@ describe("makeCache.parseCode", function() {
     })
 
     it("Gathers exports", function() {
-        const actual = parseCode(`
+        const { parseError, exports: actual } = parseCode(`
         export default function Something() {}
         export { bar }
         export { whatever as baz}
         export const foo = 'foo'
 
         export function exportedFunction() {}
-        `).exports
+        `)
+        if (parseError) throw parseError
 
         expect(actual.default).not.toBeUndefined()
         expect(actual.bar).not.toBeUndefined()
@@ -90,15 +93,16 @@ describe("makeCache.parseCode", function() {
     })
 
     it("Gathers module.exports", function() {
-        const actual = parseCode(`
+        const {parseError, exports: actual} = parseCode(`
         module.exports = {}
-        `).exports
+        `)
+        if (parseError) throw parseError
 
         expect(actual.default).not.toBeUndefined()
     })
 
     it("Gathers paths from imports / requires", function() {
-        const actual = parseCode(`
+        const { parseError, paths: actual } = parseCode(`
         const foo = require('./foo')
         const badRequire = require(foo.name)
         const { bar } = require('./bar')
@@ -113,7 +117,8 @@ describe("makeCache.parseCode", function() {
         export { y } from './named-exports'
         export default from './base/Component.react'
 
-        `).paths
+        `)
+        if (parseError) throw parseError
 
         expect(actual[0].module).toBe('./foo')
         expect(actual[1].module).toBe('./bar')
