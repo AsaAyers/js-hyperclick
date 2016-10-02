@@ -1,7 +1,7 @@
 "use babel"
 /*eslint-env jasmine */
 
-import { parseCode } from '../lib/make-cache.js'
+import parseCode from '../lib/parse-code.js'
 
 describe("makeCache.parseCode", function() {
 
