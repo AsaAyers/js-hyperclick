@@ -2,8 +2,29 @@
 /*eslint-env jasmine */
 
 import parseCode from '../lib/parse-code.js'
+import fs from 'fs'
+import path from 'path'
 
 describe("makeCache.parseCode", function() {
+
+    it("can parse every file in js-hyperclick", function() {
+        const filenames = [
+            './parse-code-spec.js',
+            '../lib/js-hyperclick.js',
+            '../lib/make-cache.js',
+            '../lib/parse-code.js',
+            '../lib/suggestions.js',
+            '../.eslintrc.js'
+        ]
+
+        filenames.forEach(name => {
+            const fullFilename = path.join(__dirname, name)
+            const code = String(fs.readFileSync(fullFilename))
+
+            const { parseError } = parseCode(code)
+            expect(parseError && parseError.message).toBeUndefined(fullFilename)
+        })
+    })
 
     it("gathers the scopes for a file", function() {
         const { parseError, scopes: actual } = parseCode(`
