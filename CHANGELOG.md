@@ -1,5 +1,9 @@
 ## `master`
 
+## 1.9.0
+
+* Upgrade to Babylon@6 (Babel@6)
+
 ## 1.8.1
 
 * Delay error notifications until the user clicks the link.
