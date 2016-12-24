@@ -1,5 +1,12 @@
 ## `master`
 
+## 1.10.0
+
+* New feature: Jump through intermediate links. See [#45](https://github.com/AsaAyers/js-hyperclick/issues/45)
+* Most of the code was moved to [js-hyperclick-core](https://www.npmjs.com/package/js-hyperclick-core) and is now has automated tests.
+* The scanner is able to create more links
+* Fixed [#48](https://github.com/AsaAyers/js-hyperclick/issues/48)
+
 ## 1.9.0
 
 * Upgrade to Babylon@6 (Babel@6)
