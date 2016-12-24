@@ -629,9 +629,9 @@ isarray@^1.0.0, isarray@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/isarray/-/isarray-1.0.0.tgz#bb935d48582cba168c06834957a54a3e07124f11"
 
-js-hyperclick-core@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/js-hyperclick-core/-/js-hyperclick-core-1.0.0.tgz#768e6b113a08f05e70c750386f925b0368df00ec"
+js-hyperclick-core@1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/js-hyperclick-core/-/js-hyperclick-core-1.1.0.tgz#845022fbb838b09b3553dd0454a1a10b716777b6"
   dependencies:
     acorn-to-esprima "^1.0.4"
     babel-core "^6.17.0"
