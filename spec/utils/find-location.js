@@ -1,3 +1,4 @@
+"use babel"
 const whitespace = (n) => Array(n+1).fill(null).join(' ')
 
 export default function findLocation(code, target) {

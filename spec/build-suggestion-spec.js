@@ -1,10 +1,12 @@
+"use babel"
 /*eslint-env jest */
 import extractAnnotations from './utils/extract-annotations'
 import findLocation from './utils/find-location'
-import { parseCode, buildSuggestion, findDestination } from '../index'
+import { parseCode, buildSuggestion, findDestination } from '../lib/core'
 import diff from 'jest-diff'
 
-const buildExpectations = (filename) => () => {
+const buildExpectations = (filename) => function() {
+    const spec = this
     const { code, annotations } = extractAnnotations(filename)
     const info = parseCode(code)
     const runner = (name) => {
@@ -14,8 +16,9 @@ const buildExpectations = (filename) => () => {
         }
     }
 
-    expect.extend({
-        toLinkToModule(startAnnotation, moduleName, imported = 'default') {
+    spec.addMatchers({
+        toLinkToModule([ moduleName, imported = 'default' ]) {
+            const startAnnotation = this.actual
             const actual = runner(startAnnotation)
             const pass = (
                 actual != null
@@ -50,7 +53,8 @@ const buildExpectations = (filename) => () => {
 
             return { pass, message }
         },
-        toBeALink(startAnnotation) {
+        toBeALink() {
+            const startAnnotation = this.actual
             const actual = runner(startAnnotation)
 
             const pass = (
@@ -58,7 +62,7 @@ const buildExpectations = (filename) => () => {
                 && actual != null
             )
 
-            const message = () => {
+            this.message = () => {
                 let str = (pass
                     ? this.utils.matcherHint('.not.toBeALink', startAnnotation, '')
                     : this.utils.matcherHint('.toBeALink', startAnnotation, '')
@@ -74,10 +78,10 @@ const buildExpectations = (filename) => () => {
                 return str
             }
 
-
-            return { pass, message }
+            return pass
         },
-        toJumpTo(startAnnotation, endAnnotation) {
+        toJumpTo(endAnnotation) {
+            const startAnnotation = this.actual
             const suggestion = runner(startAnnotation)
             const actual = findDestination(info, suggestion)
             const expected = annotations[endAnnotation] || {}
@@ -87,7 +91,7 @@ const buildExpectations = (filename) => () => {
                 && actual.start === expected.start
             )
 
-            const message = () => {
+            this.message = () => {
                 let str = (pass
                     ? this.utils.matcherHint('.not.toJumpTo', startAnnotation, endAnnotation)
                     : this.utils.matcherHint('.toJumpTo', startAnnotation, endAnnotation)
@@ -110,7 +114,7 @@ const buildExpectations = (filename) => () => {
                 return str
             }
 
-            return { pass, message}
+            return pass
         }
     })
 }
@@ -120,62 +124,62 @@ describe('buildSuggestion', () => {
     describe('es6-module.js', () => {
         beforeEach(buildExpectations('es6-module.js'))
 
-        test(`var/const/let/function declarations don't have a destination`, () => {
+        it(`var/const/let/function declarations don't have a destination`, () => {
             expect('testVar').not.toBeALink()
             expect('testConst').not.toBeALink()
             expect('testLet').not.toBeALink()
             expect('functionDeclaration').not.toBeALink()
         })
 
-        test(`variables (var/let/const) jump to their definitions`, () => {
+        it(`variables (var/let/const) jump to their definitions`, () => {
             expect('log_testVar').toJumpTo('testVar')
             expect('log_testConst').toJumpTo('testConst')
             expect('log_testLet').toJumpTo('testLet')
         })
 
-        test(`clicking a function parameter jumps to its definition`, () => {
+        it(`clicking a function parameter jumps to its definition`, () => {
             expect('log_param1').toJumpTo('param1')
         })
 
-        test(`function declarations work inside and out`, () => {
+        it(`function declarations work inside and out`, () => {
             expect(`log_functionDeclaration`).toJumpTo('functionDeclaration')
             expect(`log2_functionDeclaration`).toJumpTo('functionDeclaration')
         })
 
-        test(`destructuring works on params and variables`, () => {
+        it(`destructuring works on params and variables`, () => {
             expect('log_dstrP1').toJumpTo('dstrP1')
             expect('log_dstrP2').toJumpTo('dstrP2')
             expect('log_dstrC1').toJumpTo('dstrC1')
             expect('log_dstrC2').toJumpTo('dstrC2')
         })
 
-        test(`imported variables link to other modules`, () => {
-            expect('otherDefault').toLinkToModule('./other')
-            expect('log_otherDefault').toLinkToModule('./other')
+        it(`imported variables link to other modules`, () => {
+            expect('otherDefault').toLinkToModule(['./other'])
+            expect('log_otherDefault').toLinkToModule(['./other'])
 
-            expect('otherNamed').toLinkToModule('./other', 'otherNamed')
-            expect('log_otherNamed').toLinkToModule('./other', 'otherNamed')
+            expect('otherNamed').toLinkToModule(['./other', 'otherNamed'])
+            expect('log_otherNamed').toLinkToModule(['./other', 'otherNamed'])
 
-            expect('renamed').toLinkToModule('./other', 'otherNamed2')
-            expect('log_renamed').toLinkToModule('./other', 'otherNamed2')
+            expect('renamed').toLinkToModule(['./other', 'otherNamed2'])
+            expect('log_renamed').toLinkToModule(['./other', 'otherNamed2'])
 
         })
 
-        test(`Renamed imports are links`, () => {
-            expect('otherNamed2').toLinkToModule('./other', 'otherNamed2')
+        it(`Renamed imports are links`, () => {
+            expect('otherNamed2').toLinkToModule(['./other', 'otherNamed2'])
         })
 
-        test(`exporting existing variables makes them links`, () => {
+        it(`exporting existing variables makes them links`, () => {
             expect(`export_testConst`).toJumpTo('testConst')
         })
 
-        test(`export ... from statements are links`, () => {
-            expect(`namedExportFrom`).toLinkToModule('./exportFrom', 'namedExportFrom')
-            expect(`exportStar`).toLinkToModule('./exportStar.js')
-            expect(`defaultExportFrom`).toLinkToModule('./exportFrom')
+        it(`export ... from statements are links`, () => {
+            expect(`namedExportFrom`).toLinkToModule(['./exportFrom', 'namedExportFrom'])
+            expect(`exportStar`).toLinkToModule(['./exportStar.js'])
+            expect(`defaultExportFrom`).toLinkToModule(['./exportFrom'])
         })
 
-        test(`keywords are not links`, () => {
+        it(`keywords are not links`, () => {
             expect('if').not.toBeALink()
         })
     })
@@ -183,17 +187,17 @@ describe('buildSuggestion', () => {
     describe('cjs.js', () => {
         beforeEach(buildExpectations('cjs.js'))
 
-        test(`require() are supported`, () => {
-            expect('basicRequire').toLinkToModule('./basicRequire', 'default')
+        it(`require() are supported`, () => {
+            expect('basicRequire').toLinkToModule(['./basicRequire', 'default'])
         })
 
-        test(`destructuring does not link to named exports`, () => {
-            expect('destructured').toLinkToModule('./destructured', 'default')
-            expect('renamed').toLinkToModule('./renamed', 'default')
+        it(`destructuring does not link to named exports`, () => {
+            expect('destructured').toLinkToModule(['./destructured', 'default'])
+            expect('renamed').toLinkToModule(['./renamed', 'default'])
         })
 
-        test(`module.exports = require(...) is a link`, () => {
-            expect('exports').toLinkToModule('./es6-module')
+        it(`module.exports = require(...) is a link`, () => {
+            expect('exports').toLinkToModule(['./es6-module'])
         })
     })
 })

@@ -10,6 +10,9 @@ module.exports = {
             "experimentalObjectRestSpread": true,
         }
     },
+    "globals": {
+        "atom": true,
+    },
     "rules": {
         "comma-dangle": [ 0 ],
         "no-this-before-super": [ 2 ],

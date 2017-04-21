@@ -1,11 +1,13 @@
-/* eslint-env jest */
+"use babel"
+/* eslint-env jasmine */
 import path from 'path'
 
 import extractAnnotations from './utils/extract-annotations'
 import findLocation from './utils/find-location'
-import { parseCode, buildSuggestion, resolveModule, findDestination } from '../index'
+import { parseCode, buildSuggestion, resolveModule, findDestination } from '../lib/core'
 
-const buildExpectations = (srcFilename) => () => {
+const buildExpectations = (srcFilename) => function()  {
+    const spec = this
     const { code, annotations } = extractAnnotations('all-imports.js')
     const info = parseCode(code)
     const runner = (name) => {
@@ -14,8 +16,9 @@ const buildExpectations = (srcFilename) => () => {
             return buildSuggestion(info, text, { start, end })
         }
     }
-    expect.extend({
-        toLinkToExternalModuleLocation(startAnnotation, endAnnotation) {
+    spec.addMatchers({
+        toLinkToExternalModuleLocation(endAnnotation) {
+            const startAnnotation = this.actual
             const suggestion = runner(startAnnotation)
 
             const { filename } = resolveModule(srcFilename, suggestion)
@@ -66,11 +69,11 @@ describe(`findDestination (all-imports.js)`, () => {
     const srcFilename = path.join(__dirname, 'fixtures/all-imports.js')
     beforeEach(buildExpectations(srcFilename))
 
-    test('default import links to the default export', () => {
+    it('default import links to the default export', () => {
         expect('someModule').toLinkToExternalModuleLocation('defaultExport')
     })
 
-    test(`named import links to the named export`, () => {
+    it(`named import links to the named export`, () => {
         expect('namedExportFrom').toLinkToExternalModuleLocation('namedExportFrom')
         expect('name1').toLinkToExternalModuleLocation('name1')
         expect('name2').toLinkToExternalModuleLocation('name2')
@@ -78,17 +81,17 @@ describe(`findDestination (all-imports.js)`, () => {
         expect('name4').toLinkToExternalModuleLocation('name4')
     })
 
-    test('missingExport will go to the default export', () => {
+    it('missingExport will go to the default export', () => {
         expect('missingExport').toLinkToExternalModuleLocation('defaultExport')
     })
 
-    test(`throws when you give it a bad suggestion object`, () => {
+    it(`throws when you give it a bad suggestion object`, () => {
         const suggestion = {}
         const info = {}
 
         expect(() => {
             findDestination(info, suggestion)
-        }).toThrow(/Invalid suggestion type/)
+        }).toThrow('Invalid suggestion type')
 
     })
 })

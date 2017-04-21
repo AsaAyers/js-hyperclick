@@ -6,6 +6,7 @@
   "keywords": [],
   "repository": "https://github.com/AsaAyers/js-hyperclick",
   "license": "MIT",
+  "moduleRoots": "lib/core",
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
   },
@@ -24,6 +25,7 @@
     "resolve": "^1.1.6"
   },
   "devDependencies": {
-    "eslint": "^3.19.0"
+    "eslint": "^3.19.0",
+    "jest-diff": "^19.0.0"
   }
 }
