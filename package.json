@@ -17,9 +17,13 @@
     }
   },
   "dependencies": {
-    "js-hyperclick-core": "1.1.0"
+    "acorn-to-esprima": "^1.0.4",
+    "babel-core": "^6.17.0",
+    "babylon": "^6.11.4",
+    "escope": "^3.2.0",
+    "resolve": "^1.1.6"
   },
   "devDependencies": {
-    "eslint": "^3.7.0"
+    "eslint": "^3.19.0"
   }
 }
