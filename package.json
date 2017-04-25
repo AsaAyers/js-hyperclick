@@ -10,6 +10,10 @@
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
   },
+  "scripts": {
+      "test": "atom --test spec/",
+      "test-watch": "nodemon --exec 'npm test'"
+  },
   "providedServices": {
     "hyperclick.provider": {
       "versions": {
