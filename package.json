@@ -6,8 +6,13 @@
   "keywords": [],
   "repository": "https://github.com/AsaAyers/js-hyperclick",
   "license": "MIT",
+  "moduleRoots": "lib/core",
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
+  },
+  "scripts": {
+      "test": "atom --test spec/",
+      "test-watch": "nodemon --exec 'npm test'"
   },
   "providedServices": {
     "hyperclick.provider": {
@@ -17,9 +22,14 @@
     }
   },
   "dependencies": {
-    "js-hyperclick-core": "1.1.0"
+    "acorn-to-esprima": "^1.0.4",
+    "babel-core": "^6.17.0",
+    "babylon": "^6.11.4",
+    "escope": "^3.2.0",
+    "resolve": "^1.1.6"
   },
   "devDependencies": {
-    "eslint": "^3.7.0"
+    "eslint": "^3.19.0",
+    "jest-diff": "^19.0.0"
   }
 }

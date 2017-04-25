@@ -5,7 +5,13 @@ module.exports = {
     },
     "extends": "eslint:recommended",
     "parserOptions": {
-        "sourceType": "module"
+        "sourceType": "module",
+        "ecmaFeatures": {
+            "experimentalObjectRestSpread": true,
+        }
+    },
+    "globals": {
+        "atom": true,
     },
     "rules": {
         "comma-dangle": [ 0 ],
