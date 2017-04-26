@@ -1,5 +1,10 @@
 /* eslint-disable */
 
+import symlink from './symlink'
+
+// Manual testing should show this opens all-imports.js instead of symlink.js
+console.log(symlink)
+
 var testVar /* testVar */
 let testLet /* testLet */
 const testConst /* testConst */ = null
