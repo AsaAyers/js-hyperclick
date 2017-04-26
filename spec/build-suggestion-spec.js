@@ -1,5 +1,5 @@
 "use babel"
-/*eslint-env jest */
+/*eslint-env jasmine */
 import extractAnnotations from './utils/extract-annotations'
 import findLocation from './utils/find-location'
 import { parseCode, buildSuggestion, findDestination } from '../lib/core'
