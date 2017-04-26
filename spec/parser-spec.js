@@ -9,7 +9,6 @@ describe('parseCode', () => {
         const { code } = extractAnnotations('parse-error.js')
         const info = parseCode(code)
 
-        // $FlowFixMe
         expect(info.parseError).not.toBeUndefined()
     })
 
@@ -17,7 +16,6 @@ describe('parseCode', () => {
         const { code } = extractAnnotations('es6-module.js')
         const info = parseCode(code)
 
-        // $FlowFixMe
         expect(info.parseError).toBeUndefined()
     })
 
@@ -25,7 +23,6 @@ describe('parseCode', () => {
         const { code } = extractAnnotations('cjs.js')
         const info = parseCode(code)
 
-        // $FlowFixMe
         expect(info.parseError).toBeUndefined()
     })
 })
