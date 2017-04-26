@@ -6,6 +6,7 @@ import extractAnnotations from './utils/extract-annotations'
 import findLocation from './utils/find-location'
 import { parseCode, buildSuggestion, findDestination } from '../lib/core'
 import diff from 'jest-diff'
+import matcherHint from './utils/matcher-hint'
 
 const buildExpectations = (filename) => function() {
     const spec = this
@@ -28,20 +29,18 @@ const buildExpectations = (filename) => function() {
                 && actual.imported === imported
             )
 
-            const message = () => {
-                let str = this.utils.matcherHint(
+            this.message = () => {
+                let str = matcherHint(
                     (pass ? '.not' : '') + '.toLinkToModule',
                     startAnnotation,
-                    this.utils.stringify(moduleName),
-                    {
-                        secondArgument: this.utils.stringify(imported),
-                    }
+                    moduleName,
+                    imported,
                 ) + "\n\n"
 
                 if (annotations[startAnnotation] == null) {
-                    str += `Annotation ${this.utils.EXPECTED_COLOR(startAnnotation)} not found\n`
+                    str += `Annotation ${startAnnotation} not found\n`
                 } else if (actual == null || actual.type !== 'from-import') {
-                    str += `Annotation ${this.utils.EXPECTED_COLOR(startAnnotation)} is not a link.\n`
+                    str += `Annotation ${startAnnotation} is not a link.\n`
                 } else if (!pass) {
                     const diffString = diff(
                         { moduleName, imported},
@@ -53,7 +52,7 @@ const buildExpectations = (filename) => function() {
                 return str
             }
 
-            return { pass, message }
+            return pass
         },
         toBeALink() {
             const startAnnotation = this.actual
@@ -66,17 +65,17 @@ const buildExpectations = (filename) => function() {
 
             this.message = () => {
                 let str = (pass
-                    ? this.utils.matcherHint('.not.toBeALink', startAnnotation, '')
-                    : this.utils.matcherHint('.toBeALink', startAnnotation, '')
+                    ? matcherHint('.not.toBeALink', startAnnotation, '')
+                    : matcherHint('.toBeALink', startAnnotation, '')
                 ) + "\n\n"
 
                 if (annotations[startAnnotation] == null) {
-                    str += `Annotation ${this.utils.EXPECTED_COLOR(startAnnotation)} not found\n`
+                    str += `Annotation ${startAnnotation} not found\n`
                 } else if (actual == null) {
                     str += `Destination not found`
                 } else if (typeof actual.start !== 'undefined') {
                     str += `Actually jumped to:\n`
-                    str += `${this.utils.RECEIVED_COLOR(findLocation(code, actual.start))}\n`
+                    str += `${findLocation(code, actual.start)}\n`
                 }
 
                 return str
@@ -97,22 +96,22 @@ const buildExpectations = (filename) => function() {
 
             this.message = () => {
                 let str = (pass
-                    ? this.utils.matcherHint('.not.toJumpTo', startAnnotation, endAnnotation)
-                    : this.utils.matcherHint('.toJumpTo', startAnnotation, endAnnotation)
+                    ? matcherHint('.not.toJumpTo', startAnnotation, endAnnotation)
+                    : matcherHint('.toJumpTo', startAnnotation, endAnnotation)
                 ) + "\n\n"
 
                 if (expected.start == null) {
-                    str += `Annotation ${this.utils.EXPECTED_COLOR(endAnnotation)} not found\n`
+                    str += `Annotation ${endAnnotation} not found\n`
                 } else {
                     str += `Expected ${pass ? 'not ' : ''}to jump to:\n`
-                    str += `${this.utils.EXPECTED_COLOR(findLocation(code, expected.start))}\n`
+                    str += `${findLocation(code, expected.start)}\n`
                 }
 
                 if (actual == null) {
-                    str += `Annotation ${this.utils.RECEIVED_COLOR(startAnnotation)} not found\n`
+                    str += `Annotation ${startAnnotation} not found\n`
                 } else if (!pass) {
                     str += `Actually jumped to:\n`
-                    str += `${this.utils.RECEIVED_COLOR(findLocation(code, actual.start))}\n`
+                    str += `${findLocation(code, actual.start)}\n`
                 }
 
                 return str

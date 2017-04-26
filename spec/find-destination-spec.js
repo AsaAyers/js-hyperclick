@@ -6,6 +6,8 @@ import path from 'path'
 import extractAnnotations from './utils/extract-annotations'
 import findLocation from './utils/find-location'
 import { parseCode, buildSuggestion, resolveModule, findDestination } from '../lib/core'
+import matcherHint from './utils/matcher-hint'
+
 
 const buildExpectations = (srcFilename) => function()  {
     const spec = this
@@ -47,30 +49,30 @@ const buildExpectations = (srcFilename) => function()  {
                 // && actual.imported === imported
             )
 
-            const message = () => {
+            this.message = () => {
                 let str = (pass
-                    ? this.utils.matcherHint('.not.toLinkToExternalModuleLocation', startAnnotation, endAnnotation)
-                    : this.utils.matcherHint('.toLinkToExternalModuleLocation', startAnnotation, endAnnotation)
+                    ? matcherHint('.not.toLinkToExternalModuleLocation', startAnnotation, endAnnotation)
+                    : matcherHint('.toLinkToExternalModuleLocation', startAnnotation, endAnnotation)
                 ) + "\n\n"
 
                 if (!expected || expected.start == null) {
-                    str += `Annotation ${this.utils.EXPECTED_COLOR(endAnnotation)} not found\n`
+                    str += `Annotation ${endAnnotation} not found\n`
                 } else {
                     str += `Expected ${pass ? 'not ' : ''}to jump to:\n`
-                    str += `${this.utils.EXPECTED_COLOR(findLocation(code, expected.start))}\n`
+                    str += `${findLocation(code, expected.start)}\n`
                 }
 
                 if (actual == null) {
-                    str += `Annotation ${this.utils.RECEIVED_COLOR(startAnnotation)} not found\n`
+                    str += `Annotation ${startAnnotation} not found\n`
                 } else if (!pass) {
                     str += `Actually jumped to:\n`
-                    str += `${this.utils.RECEIVED_COLOR(findLocation(code, actual.start))}\n`
+                    str += `${findLocation(code, actual.start)}\n`
                 }
 
                 return str
             }
 
-            return { pass, message }
+            return pass
         },
     })
 }
