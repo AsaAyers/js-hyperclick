@@ -25,13 +25,15 @@ const buildExpectations = (srcFilename) => function()  {
             let actual
             let annotations = {}
             if (suggestion != null && suggestion.type === 'from-import') {
-                const { filename } = resolveModule(srcFilename, suggestion)
-                const tmp = extractAnnotations(filename)
-                const info = parseCode(tmp.code)
-                annotations = tmp.annotations
+                const resolved = resolveModule(srcFilename, suggestion)
 
-                actual = findDestination(info, suggestion)
+                if (typeof resolved.filename !== 'undefined') {
+                    const tmp = extractAnnotations(resolved.filename)
+                    const info = parseCode(tmp.code)
+                    annotations = tmp.annotations
 
+                    actual = findDestination(info, suggestion)
+                }
             }
 
             const expected = annotations[endAnnotation]
