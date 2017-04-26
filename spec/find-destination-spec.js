@@ -24,7 +24,7 @@ const buildExpectations = (srcFilename) => function()  {
 
             let actual
             let annotations = {}
-            if (suggestion != null) {
+            if (suggestion != null && suggestion.type === 'from-import') {
                 const { filename } = resolveModule(srcFilename, suggestion)
                 const tmp = extractAnnotations(filename)
                 const info = parseCode(tmp.code)
