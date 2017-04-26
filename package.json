@@ -11,8 +11,8 @@
     "atom": ">=1.0.0 <2.0.0"
   },
   "scripts": {
-      "test": "atom --test spec/",
-      "test-watch": "nodemon --exec 'npm test'"
+    "test": "atom --test spec/",
+    "test-watch": "nodemon --exec 'npm test'"
   },
   "providedServices": {
     "hyperclick.provider": {
@@ -29,7 +29,9 @@
     "resolve": "^1.1.6"
   },
   "devDependencies": {
+    "babel-eslint": "^7.2.3",
     "eslint": "^3.19.0",
+    "flow-bin": "^0.44.2",
     "jest-diff": "^19.0.0"
   }
 }

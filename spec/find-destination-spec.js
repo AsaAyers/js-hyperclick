@@ -1,4 +1,5 @@
 "use babel"
+// @flow
 /* eslint-env jasmine */
 import path from 'path'
 
@@ -21,17 +22,26 @@ const buildExpectations = (srcFilename) => function()  {
             const startAnnotation = this.actual
             const suggestion = runner(startAnnotation)
 
-            const { filename } = resolveModule(srcFilename, suggestion)
-            const { code, annotations } = extractAnnotations(filename)
-            const info = parseCode(code)
+            let actual
+            let annotations = {}
+            if (suggestion != null && suggestion.type === 'from-import') {
+                const resolved = resolveModule(srcFilename, suggestion)
 
-            const actual = findDestination(info, suggestion)
+                if (typeof resolved.filename !== 'undefined') {
+                    const tmp = extractAnnotations(resolved.filename)
+                    const info = parseCode(tmp.code)
+                    annotations = tmp.annotations
+
+                    actual = findDestination(info, suggestion)
+                }
+            }
 
             const expected = annotations[endAnnotation]
 
             const pass = (
                 suggestion != null
                 && expected != null
+                && actual != null
                 && actual.start === expected.start
                 // && actual.moduleName === moduleName
                 // && actual.imported === imported
@@ -90,6 +100,7 @@ describe(`findDestination (all-imports.js)`, () => {
         const info = {}
 
         expect(() => {
+            // $FlowExpectError
             findDestination(info, suggestion)
         }).toThrow('Invalid suggestion type')
 

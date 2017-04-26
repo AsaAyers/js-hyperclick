@@ -1,5 +1,7 @@
 "use babel"
-/*eslint-env jest */
+// @flow
+/*eslint-env jasmine */
+import type { Suggestion } from '../lib/types'
 import extractAnnotations from './utils/extract-annotations'
 import findLocation from './utils/find-location'
 import { parseCode, buildSuggestion, findDestination } from '../lib/core'
@@ -9,7 +11,7 @@ const buildExpectations = (filename) => function() {
     const spec = this
     const { code, annotations } = extractAnnotations(filename)
     const info = parseCode(code)
-    const runner = (name) => {
+    const runner = (name): ?Suggestion => {
         if (annotations[name]) {
             const { text, start, end } = annotations[name]
             return buildSuggestion(info, text, { start, end })
@@ -38,7 +40,7 @@ const buildExpectations = (filename) => function() {
 
                 if (annotations[startAnnotation] == null) {
                     str += `Annotation ${this.utils.EXPECTED_COLOR(startAnnotation)} not found\n`
-                } else if (actual == null) {
+                } else if (actual == null || actual.type !== 'from-import') {
                     str += `Annotation ${this.utils.EXPECTED_COLOR(startAnnotation)} is not a link.\n`
                 } else if (!pass) {
                     const diffString = diff(
@@ -70,7 +72,9 @@ const buildExpectations = (filename) => function() {
 
                 if (annotations[startAnnotation] == null) {
                     str += `Annotation ${this.utils.EXPECTED_COLOR(startAnnotation)} not found\n`
-                } else if (actual != null) {
+                } else if (actual == null) {
+                    str += `Destination not found`
+                } else if (typeof actual.start !== 'undefined') {
                     str += `Actually jumped to:\n`
                     str += `${this.utils.RECEIVED_COLOR(findLocation(code, actual.start))}\n`
                 }

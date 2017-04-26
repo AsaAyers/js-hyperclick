@@ -1,8 +1,8 @@
 "use babel"
-/*eslint-env jest */
+// @flow
+/*eslint-env jasmine */
 import extractAnnotations from './utils/extract-annotations'
 import { parseCode } from '../lib/core'
-
 
 describe('parseCode', () => {
     it('parse-error.js reports a parse error', () => {
@@ -17,7 +17,6 @@ describe('parseCode', () => {
         const info = parseCode(code)
 
         expect(info.parseError).toBeUndefined()
-
     })
 
     it('cjs.js does not have a parse error', () => {
@@ -25,6 +24,5 @@ describe('parseCode', () => {
         const info = parseCode(code)
 
         expect(info.parseError).toBeUndefined()
-
     })
 })
