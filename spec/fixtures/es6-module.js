@@ -1,9 +1,16 @@
 /* eslint-disable */
 
+import type { Range } from './types'
+
 import symlink from './symlink'
 
 // Manual testing should show this opens all-imports.js instead of symlink.js
 console.log(symlink)
+
+const range: Range /* Range */ = {
+    start: 1,
+    end: 10,
+}
 
 var testVar /* testVar */
 let testLet /* testLet */

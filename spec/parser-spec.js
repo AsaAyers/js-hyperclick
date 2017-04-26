@@ -19,6 +19,23 @@ describe('parseCode', () => {
         expect(info.parseError).toBeUndefined()
     })
 
+    it(`Exported flow types/interfaces are captured`, () => {
+        const { code } = extractAnnotations('types.js')
+        const info = parseCode(code)
+
+        if (info.exports == null) {
+            throw info.parseError
+        }
+
+        const { Range, Foo } = info.exports
+
+        // export type
+        expect(Range).toBeDefined()
+        // export interface
+        expect(Foo).toBeDefined()
+    })
+
+
     it('cjs.js does not have a parse error', () => {
         const { code } = extractAnnotations('cjs.js')
         const info = parseCode(code)

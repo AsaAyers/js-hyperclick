@@ -1,5 +1,7 @@
 /* eslint-disable */
 
+import type { Range /* Range */, Foo as RenamedFoo /* RenamedFoo */ } from './types'
+
 import someModule /* someModule */, {
     namedExportFrom, /* namedExportFrom */
     missingExport, /* missingExport */

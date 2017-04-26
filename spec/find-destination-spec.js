@@ -93,6 +93,11 @@ describe(`findDestination (all-imports.js)`, () => {
         expect('name4').toLinkToExternalModuleLocation('name4')
     })
 
+    it(`imported types link to the exported type`, () => {
+        expect('Range').toLinkToExternalModuleLocation('Range')
+        expect('RenamedFoo').toLinkToExternalModuleLocation('Foo')
+    })
+
     it('missingExport will go to the default export', () => {
         expect('missingExport').toLinkToExternalModuleLocation('defaultExport')
     })
