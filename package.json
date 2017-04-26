@@ -14,6 +14,7 @@
     "test": "atom --test spec/",
     "test-watch": "nodemon --exec 'npm test'"
   },
+  "package-deps": ["hyperclick"],
   "providedServices": {
     "hyperclick.provider": {
       "versions": {
@@ -23,6 +24,7 @@
   },
   "dependencies": {
     "acorn-to-esprima": "^1.0.4",
+    "atom-package-deps": "^4.6.0",
     "babel-core": "^6.17.0",
     "babylon": "^6.11.4",
     "escope": "^3.2.0",

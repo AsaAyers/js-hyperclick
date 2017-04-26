@@ -1,13 +1,13 @@
 // @flow
 /* eslint-disable no-unused-vars */
 
-declare var atom: Object;
+declare var atom: Object
 
-declare class Disposable {
-  dispose(): void;
-}
 
 declare module 'atom' {
+    declare class Disposable {
+        dispose(): void;
+    }
     declare type Point = {
         toArray: () => [number, number]
     }
@@ -35,14 +35,4 @@ declare module 'atom' {
         getText: () => string,
         onDidStopChanging: (cb: () => void) => any
     }
-}
-
-
-
-
-
-
-
-declare module 'shell' {
-    declare var openExternal: (string) => void
 }
