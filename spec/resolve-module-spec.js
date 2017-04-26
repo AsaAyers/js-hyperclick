@@ -1,7 +1,9 @@
 "use babel"
+// @flow
 /* eslint-env jasmine */
 import path from 'path'
 import { resolveModule } from '../lib/core'
+import type { Resolved } from '../lib/types'
 
 describe('resolveModule', () => {
 
@@ -10,7 +12,7 @@ describe('resolveModule', () => {
         const suggestion = {
             moduleName: './parser.test.js'
         }
-        const expected = { filename: path.join(__dirname, 'parser.test.js') }
+        const expected: Resolved = { type: 'file', filename: path.join(__dirname, 'parser.test.js') }
 
         const actual = resolveModule(__filename, suggestion, options)
         expect(actual).toEqual(expected)
@@ -20,7 +22,10 @@ describe('resolveModule', () => {
         const suggestion = {
             moduleName: 'path'
         }
-        const expected = { url: "http://nodejs.org/api/path.html" }
+        const expected: Resolved = {
+            type: 'url',
+            url: "http://nodejs.org/api/path.html",
+        }
 
         const actual = resolveModule(__filename, suggestion, options)
         expect(actual).toEqual(expected)
@@ -31,7 +36,8 @@ describe('resolveModule', () => {
             moduleName: 'resolve'
         }
 
-        const expected = {
+        const expected: Resolved = {
+            type: 'file',
             filename: path.join(__dirname, '../node_modules/resolve/index.js')
         }
 
@@ -43,7 +49,10 @@ describe('resolveModule', () => {
         const suggestion = {
             moduleName: 'some-unexpected-module'
         }
-        const expected = { filename: undefined }
+        const expected: Resolved = {
+            type: 'file',
+            filename: undefined
+        }
 
         const actual = resolveModule(__filename, suggestion, options)
         expect(actual).toEqual(expected)
@@ -53,7 +62,8 @@ describe('resolveModule', () => {
         const suggestion = {
             moduleName: './newFile'
         }
-        const expected = {
+        const expected: Resolved = {
+            type: 'file',
             filename: path.join(__dirname, './newFile.js')
         }
 
@@ -66,6 +76,7 @@ describe('resolveModule', () => {
             moduleName: './fixtures/custom-extension.jsx'
         }
         const expected = {
+            type: 'file',
             filename: path.join(__dirname, './fixtures/custom-extension.jsx')
         }
 
@@ -77,7 +88,8 @@ describe('resolveModule', () => {
         const suggestion = {
             moduleName: './fixtures/custom-extension-2'
         }
-        const expected = {
+        const expected: Resolved = {
+            type: 'file',
             filename: path.join(__dirname, './fixtures/custom-extension-2.jsx')
         }
         const options = {
@@ -92,7 +104,8 @@ describe('resolveModule', () => {
         const suggestion = {
             moduleName: './fixtures/custom-extension'
         }
-        const expected = {
+        const expected: Resolved = {
+            type: 'file',
             filename: path.join(__dirname, './fixtures/custom-extension.js')
         }
 
@@ -104,7 +117,8 @@ describe('resolveModule', () => {
         const suggestion = {
             moduleName: 'parse-code'
         }
-        const expected = {
+        const expected: Resolved = {
+            type: 'file',
             filename: path.join(__dirname, '../lib/core/parse-code.js')
         }
 
@@ -116,7 +130,10 @@ describe('resolveModule', () => {
         const suggestion = {
             moduleName: 'parse-code'
         }
-        const expected = { filename: undefined }
+        const expected: Resolved = {
+            type: 'file',
+            filename: undefined
+        }
         const actual = resolveModule('/foo.js', suggestion, options)
 
         expect(actual).toEqual(expected)
