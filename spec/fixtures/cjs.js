@@ -1,11 +1,11 @@
 /* eslint-disable */
 
-const basicRequire /* basicRequire */ = require('./basicRequire')
+const basicRequire /* basicRequire */ = require("./basicRequire")
 
-const { destructured /* destructured */ } = require('./destructured')
+const { destructured /* destructured */ } = require("./destructured")
 
-const { a: renamed /* renamed */ } = require('./renamed')
+const { a: renamed /* renamed */ } = require("./renamed")
 
-require.resolve('./basicRequire' /* resolve */)
+require.resolve("./basicRequire" /* resolve */)
 
-module.exports /* exports */ = require('./es6-module')
+module.exports /* exports */ = require("./es6-module")

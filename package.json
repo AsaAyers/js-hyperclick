@@ -11,10 +11,21 @@
     "atom": ">=1.0.0 <2.0.0"
   },
   "scripts": {
+    "precommit": "lint-staged && npm test",
     "test": "atom --test spec/",
     "test-watch": "nodemon --exec 'npm test'"
   },
-  "package-deps": ["hyperclick"],
+  "lint-staged": {
+    "*.js": [
+      "prettier --write --no-semi --trailing-comma all",
+      "eslint",
+      "git add"
+    ]
+  },
+
+  "package-deps": [
+    "hyperclick"
+  ],
   "providedServices": {
     "hyperclick.provider": {
       "versions": {
@@ -34,6 +45,9 @@
     "babel-eslint": "^7.2.3",
     "eslint": "^3.19.0",
     "flow-bin": "^0.44.2",
-    "jest-diff": "^19.0.0"
+    "husky": "^0.13.3",
+    "jest-diff": "^19.0.0",
+    "lint-staged": "^3.4.0",
+    "prettier": "^1.2.2"
   }
 }
