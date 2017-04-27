@@ -25,20 +25,20 @@ const buildExpectations = (srcFilename) => function()  {
             const suggestion = runner(startAnnotation)
 
             let actual
-            let annotations = {}
+            let destinationAnnotations = {}
             if (suggestion != null && suggestion.type === 'from-import') {
                 const resolved = resolveModule(srcFilename, suggestion)
 
                 if (typeof resolved.filename !== 'undefined') {
                     const tmp = extractAnnotations(resolved.filename)
                     const info = parseCode(tmp.code)
-                    annotations = tmp.annotations
+                    destinationAnnotations = tmp.annotations
 
                     actual = findDestination(info, suggestion)
                 }
             }
 
-            const expected = annotations[endAnnotation]
+            const expected = destinationAnnotations[endAnnotation]
 
             const pass = (
                 suggestion != null
@@ -62,8 +62,12 @@ const buildExpectations = (srcFilename) => function()  {
                     str += `${findLocation(code, expected.start)}\n`
                 }
 
-                if (actual == null) {
+                if (annotations[startAnnotation] == null) {
                     str += `Annotation ${startAnnotation} not found\n`
+                }
+
+                if (actual == null) {
+                    str += `Suggestion for ${startAnnotation} not found\n`
                 } else if (!pass) {
                     str += `Actually jumped to:\n`
                     str += `${findLocation(code, actual.start)}\n`

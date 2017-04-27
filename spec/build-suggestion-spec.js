@@ -39,7 +39,7 @@ const buildExpectations = (filename) => function() {
 
                 if (annotations[startAnnotation] == null) {
                     str += `Annotation ${startAnnotation} not found\n`
-                } else if (actual == null || actual.type !== 'from-import') {
+                } else if (actual == null || actual.type === 'binding') {
                     str += `Annotation ${startAnnotation} is not a link.\n`
                 } else if (!pass) {
                     const diffString = diff(
@@ -192,6 +192,10 @@ describe('buildSuggestion', () => {
 
         it(`require() are supported`, () => {
             expect('basicRequire').toLinkToModule(['./basicRequire', 'default'])
+        })
+
+        it(`require.resolve() are supported`, () => {
+            expect('resolve').toLinkToModule(['./basicRequire', 'default'])
         })
 
         it(`destructuring does not link to named exports`, () => {
