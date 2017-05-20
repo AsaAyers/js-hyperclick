@@ -10,6 +10,17 @@ hope that it solves some of yours.
 
 # FAQ
 
+## What is js-hyperclick?
+
+js-hyperclick is a scanner that integrates with [hyperclick][hyperclick]. It does not have
+any keyboard shortcuts or commands. It does not have any user interface. All of that
+is managed by [hyperclick][hyperclick].
+
+js-hyperclick uses Babylon (Babel) to parse JavaScript. It scans for all
+imports, exports, requires, identifiers (variables), and scopes. Using this
+information it can locate the origin of any identifier. It does not and will not
+track properties (ex. `identifier.property`), see below for more info.
+
 ## I configured {babel,eslint,flow,webpack,etc} to avoid '../' in my imports. How can I configure `js-hyperclick`?
 
 First, I think it's a bad idea to do that and I never configure my projects this
@@ -36,10 +47,12 @@ it. If you keep your common modules in `src/lib` you can add this to your
 
 With that in place `require('foo')` or `import 'foo'` with both locate your `src/lib/foo` module.
 
-## Why doesn't `js-hyperclick` see my jsx files?
+## Why does `require('./otherfile')` open `otherfile.js` instead of `otherfile.jsx`?
 
 There is a setting in `js-hyperclick` to add additional extensions. My
-configuration is `.js, .jsx, .coffee`
+configuration is `.js, .jsx, .coffee`. This does not cause js-hyperclick to scan
+CoffeeScript. This will just locate them if you require the file without the
+extension.
 
 ## Can you add support for `this.doSomething()`?
 
