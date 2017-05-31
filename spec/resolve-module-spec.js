@@ -140,4 +140,21 @@ describe("resolveModule", () => {
 
     expect(actual).toEqual(expected)
   })
+
+  it(`resolve using moduleRoots in .js-hyperclick.json`, () => {
+    const suggestion = {
+      moduleName: "via-config",
+    }
+    const expected: Resolved = {
+      type: "file",
+      filename: path.join(__dirname, "fixtures/fake-project/lib/via-config.js"),
+    }
+
+    const actual = resolveModule(
+      path.join(__dirname, "fixtures/fake-project/index.js"),
+      suggestion,
+      options,
+    )
+    expect(actual).toEqual(expected)
+  })
 })
