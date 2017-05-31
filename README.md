@@ -47,6 +47,17 @@ it. If you keep your common modules in `src/lib` you can add this to your
 
 With that in place `require('foo')` or `import 'foo'` with both locate your `src/lib/foo` module.
 
+Alternatively, it may be useful to have this configuration option in a separate
+config file, in order not to pollute `package.json` with Atom specific
+configuration. Useful on large projects with multiple contributors which are not
+all using Atom.
+
+Use a `.js-hyperclick.json` file with the following content:
+
+```json
+{ "moduleRoots": [ "src/lib" ] }
+```
+
 ## Why does `require('./otherfile')` open `otherfile.js` instead of `otherfile.jsx`?
 
 There is a setting in `js-hyperclick` to add additional extensions. My
