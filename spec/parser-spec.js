@@ -41,4 +41,12 @@ describe("parseCode", () => {
 
     expect(info.parseError).toBeUndefined()
   })
+
+  it(`should not capture dynamic requires, becuase we can't know the moduleName`, () => {
+    const { code } = extractAnnotations("cjs.js")
+    const info = parseCode(code)
+
+    const config = info.externalModules.find(i => i.local === "config")
+    expect(config).toBeUndefined() // because it's a dynamic require
+  })
 })
