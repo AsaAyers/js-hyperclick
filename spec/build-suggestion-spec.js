@@ -203,5 +203,9 @@ describe("buildSuggestion", () => {
     it(`module.exports = require(...) is a link`, () => {
       expect("exports").toLinkToModule(["./es6-module"])
     })
+
+    it(`will jump to the variable declaration for dynamic requires`, () => {
+      expect("config").toJumpTo("configVar")
+    })
   })
 })
