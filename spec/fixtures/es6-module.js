@@ -4,6 +4,8 @@ import type { Range } from "./types"
 
 import symlink from "./symlink"
 
+const dynamicSymlink = import("./symlink")
+
 // Manual testing should show this opens all-imports.js instead of symlink.js
 console.log(symlink)
 
