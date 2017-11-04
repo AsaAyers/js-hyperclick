@@ -4,10 +4,13 @@ import type { Range } from "./types"
 
 import symlink from "./symlink"
 
-const dynamicSymlink = import("./symlink")
+const importSymlink = import("./symlink")
+const requireSymlink = require("./symlink")
 
 // Manual testing should show this opens all-imports.js instead of symlink.js
 console.log(symlink)
+console.log(importSymlink)
+console.log(requireSymlink)
 
 const range: Range /* Range */ = {
   start: 1,
@@ -24,7 +27,7 @@ console.log({
   testConst /* log_testConst */,
 })
 
-function functionDeclaration /* functionDeclaration */(param1 /* param1 */) {
+function functionDeclaration(/* functionDeclaration */ param1 /* param1 */) {
   console.log({
     param1 /* log_param1 */,
     functionDeclaration /* log_functionDeclaration */,

@@ -1,5 +1,9 @@
 ## `master`
 
+## 1.12.0
+
+* Add support for `import()`
+
 ## 1.10.0
 
 * New feature: Jump through intermediate links. See [#45](https://github.com/AsaAyers/js-hyperclick/issues/45)
