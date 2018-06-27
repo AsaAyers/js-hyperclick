@@ -1,4 +1,5 @@
 # js-hyperclick package
+### `supports setting up root path`
 
 A [hyperclick][hyperclick] provider that lets you jump to where variables are defined.
 
@@ -38,8 +39,8 @@ and
 > -[@dan_abramov](https://twitter.com/dan_abramov/status/771741318129324032)
 
 If you're still set on custom module directories, there is a way to configure
-it. If you keep your common modules in `src/lib` you can add this to your
-`package.json`:
+it. If you keep your common modules in `src/lib` you can add this through setting in 
+`js-hyperclick -> rootPath` or your `package.json`:
 
 ```json
 "moduleRoots": [ "src/lib" ],
