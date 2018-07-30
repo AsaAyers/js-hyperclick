@@ -1,10 +1,9 @@
 {
   "name": "js-hyperclick",
   "main": "./lib/js-hyperclick",
-  "version": "1.13.0",
+  "version": "1.13.2",
   "description": "A hyperclick provider that lets you jump to where variables are defined.",
   "keywords": [],
-  "repository": "https://github.com/AsaAyers/js-hyperclick",
   "license": "MIT",
   "moduleRoots": "lib/core",
   "engines": {
