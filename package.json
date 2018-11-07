@@ -32,10 +32,9 @@
     }
   },
   "dependencies": {
+    "@babel/core": "^7.1.5",
     "acorn-to-esprima": "^1.0.4",
     "atom-package-deps": "^4.6.0",
-    "babel-core": "^6.17.0",
-    "babylon": "^6.11.4",
     "escope": "^3.2.0",
     "resolve": "^1.1.6"
   },
