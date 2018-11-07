@@ -39,8 +39,8 @@
     "resolve": "^1.1.6"
   },
   "devDependencies": {
-    "babel-eslint": "^7.2.3",
-    "eslint": "^3.19.0",
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.8.0",
     "flow-bin": "^0.44.2",
     "husky": "^0.13.3",
     "jest-diff": "^19.0.0",
