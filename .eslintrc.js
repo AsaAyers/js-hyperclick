@@ -18,7 +18,9 @@ module.exports = {
     "comma-dangle": [0],
     "no-this-before-super": [2],
     "constructor-super": [2],
-    indent: [2, 2],
+    // prettier handles indentation, and they disagree on some of the code in
+    // find-destination-spec.jw
+    // indent: [2, 2],
     "linebreak-style": [2, "unix"],
     "no-var": [1],
     "prefer-const": [1],

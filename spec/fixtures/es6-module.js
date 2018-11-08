@@ -41,7 +41,10 @@ function testDestructuring({
   dstrP1 /* dstrP1 */,
   dBar: [dstrP2 /* dstrP2 */],
 }) {
-  const { dstrC1 /* dstrC1 */, arr: [dstrC2 /* dstrC2 */] } = {}
+  const {
+    dstrC1 /* dstrC1 */,
+    arr: [dstrC2 /* dstrC2 */],
+  } = {}
 
   console.log({
     dstrP1 /* log_dstrP1 */,
@@ -73,5 +76,16 @@ if (/* if */ true) {
 
 export const exportConst /* exportConst */ = null
 export function exportFunction /* exportFunction */() {}
-export const { name1 /* name1 */, x: { name2 /* name2 */ } } = {}
+export const {
+  name1 /* name1 */,
+  x: { name2 /* name2 */ },
+} = {}
 export const [name3 /* name3 */, [name4 /* name4 */]] = {}
+
+function FragmentComponent() {
+  return (
+    <>
+      <span>Foo</span>
+    </>
+  )
+}
