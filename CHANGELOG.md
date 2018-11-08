@@ -1,5 +1,15 @@
 ## `master`
 
+## 1.14.0
+
+* Upgrade to Babel 7
+  * This brings React's fragment syntax
+
+## 1.13.x
+
+* Trying to js-hyperclick into the `atom` module will open the documentation
+* add new scope: `javascript`
+
 ## 1.12.0
 
 * Add support for `import()`
