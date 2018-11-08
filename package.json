@@ -1,7 +1,7 @@
 {
   "name": "js-hyperclick",
   "main": "./lib/js-hyperclick",
-  "version": "1.14.0",
+  "version": "1.14.1",
   "description": "A hyperclick provider that lets you jump to where variables are defined.",
   "keywords": [],
   "license": "MIT",
