@@ -4,6 +4,7 @@
 
 * Upgrade to Babel 7
   * This brings React's fragment syntax
+* add new scope `source.flow`
 
 ## 1.13.x
 
