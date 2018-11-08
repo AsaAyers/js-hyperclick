@@ -1,10 +1,11 @@
 ## `master`
 
-## 1.14.0
+## 1.14.x
 
 * Upgrade to Babel 7
   * This brings React's fragment syntax
 * add new scope `source.flow`
+* Add debugging - run `localStorage.debug="js-hyperclick*"` in the console to turn it on
 
 ## 1.13.x
 
