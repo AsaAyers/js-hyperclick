@@ -21,31 +21,43 @@ imports, exports, requires, identifiers (variables), and scopes. Using this
 information it can locate the origin of any identifier. It does not and will not
 track properties (ex. `identifier.property`), see below for more info.
 
-## I configured {babel,eslint,flow,webpack,etc} to avoid '../' in my imports. How can I configure `js-hyperclick`?
+## moduleRoots
 
-First, I think it's a bad idea to do that and I never configure my projects this
-way. In a twitter conversation to see if we could standardize this across
-projects some good points were made:
+If you have configured your project to avoid `../` in your imports, you can
+configure js-hyperclick using `moduleRoots` in your `package.json`. The
+configuration belongs there and not in Atom because it is specific to your
+project.
 
-> @nodkz the module loader is locked (in node anyways) so any feature additions should be rejected
->
-> -[@evanhlucas](https://twitter.com/evanhlucas/status/771750602967703561)
-
-and
-
-> @nodkz @left_pad @izs @slicknet @zpao I think this is at odds with Node resolution mechanism so it likely won’t happen.
->
-> -[@dan_abramov](https://twitter.com/dan_abramov/status/771741318129324032)
-
-If you're still set on custom module directories, there is a way to configure
-it. If you keep your common modules in `src/lib` you can add this to your
-`package.json`:
+For most use cases, you just need to specify the folders to search.
+If you want `import 'foo'` to resolve to `src/lib/foo`, just drop this in your `package.json`.
 
 ```json
 "moduleRoots": [ "src/lib" ],
 ```
 
-With that in place `require('foo')` or `import 'foo'` with both locate your `src/lib/foo` module.
+If you're using something more advanced like module aliases you can implement
+your own custom resolver. Instead of pointing `moduleRoots` to a folder, just
+point it to a JavaScript file and `js-hyperclick` will `require()` and use it [*][security].
+
+While `js-hyperclick` doesn't use these kinds of features in practice, I have
+configured them as an example and to validate functionality.
+
+1. moduleRoots configuration in [package.json][moduleRoots]
+2. [custom-resolver.js][custom-resolver.js]
+3. [spec/fixtures/moduleRoots.js][fixture-moduleRoots]
+
+## Custom Resolver Security
+
+Custom resolvers run inside Atom and extend the functionality of
+`js-hyperclick`. This means there is some risk that you could checkout a project
+that contains a malicious custom resolver. In order to mitigate this risk, when
+`js-hyperclick` encounters a new resolver it will open it and ask if you want to
+trust it. Whether you trust or distrust the resolver, `js-hyperclick` stores
+that hash so you don't get prompted when switching between branches of a
+project, or if you have use the exact same resolver code across multiple
+projects.
+
+![trust-resolver](https://raw.githubusercontent.com/AsaAyers/js-hyperclick/master/screenshots/trust-resolver.png)
 
 ## Why does `require('./otherfile')` open `otherfile.js` instead of `otherfile.jsx`?
 
@@ -73,3 +85,7 @@ used RequireJS for years
 [code-links]: https://atom.io/packages/code-links
 [resolve]: https://www.npmjs.com/package/resolvehttps://www.npmjs.com/package/resolve
 [webpack-config]: http://webpack.github.io/docs/configuration.html#resolve-modulesdirectories
+[moduleRoots]: https://github.com/AsaAyers/js-hyperclick/blob/master/package.json#L8-L11
+[custom-resolver.js]: https://github.com/AsaAyers/js-hyperclick/blob/master/custom-resolver.js
+[fixture-moduleRoots]: https://github.com/AsaAyers/js-hyperclick/blob/master/spec/fixtures/moduleRoots.js
+[security]:https://github.com/AsaAyers/js-hyperclick#custom-resolver-security

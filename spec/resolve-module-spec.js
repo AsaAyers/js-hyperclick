@@ -2,11 +2,15 @@
 // @flow
 /* eslint-env jasmine */
 import path from "path"
-import { resolveModule } from "../lib/core"
+import { resolveModule, hashFile } from "../lib/core"
 import type { Resolved } from "../lib/types"
 
 describe("resolveModule", () => {
-  const options = {}
+  const customResolver = path.join(__dirname, "../custom-resolver.js")
+  const hash = hashFile(customResolver)
+  const options = {
+    trustedResolvers: [{ hash, trusted: true }],
+  }
   it("relative path with extension", () => {
     const suggestion = {
       moduleName: "./parser.test.js",
@@ -94,11 +98,12 @@ describe("resolveModule", () => {
       type: "file",
       filename: path.join(__dirname, "./fixtures/custom-extension-2.jsx"),
     }
-    const options = {
+    const fileExtensionOptions = {
+      ...options,
       extensions: [".js", ".json", ".node", ".jsx"],
     }
 
-    const actual = resolveModule(__filename, suggestion, options)
+    const actual = resolveModule(__filename, suggestion, fileExtensionOptions)
     expect(actual).toEqual(expected)
   })
 
@@ -122,6 +127,82 @@ describe("resolveModule", () => {
     const expected: Resolved = {
       type: "file",
       filename: path.join(__dirname, "../lib/core/parse-code.js"),
+    }
+
+    const actual = resolveModule(__filename, suggestion, options)
+    expect(actual).toEqual(expected)
+  })
+
+  it("customResolver: No trusted resolvers", () => {
+    const options = { trustedResolvers: [] }
+    const suggestion = {
+      moduleName: "@/js-hyperclick",
+    }
+    const filename = path.join(__dirname, "../custom-resolver.js")
+    const hash = hashFile(filename)
+
+    const expected: Resolved = {
+      type: "resolver",
+      filename,
+      hash,
+      lastHash: hash,
+    }
+
+    const actual = resolveModule(__filename, suggestion, options)
+
+    // If this test runs in isolation `lastHash` will be undefined, but when run
+    // in the suite it will always be the hash of the file. Because I'm not
+    // testing that functionality I'll just alwyas set it. $FlowExpectError
+    actual.lastHash = hash
+    expect(actual).toEqual(expected)
+  })
+
+  it("customResolver: alias @", () => {
+    const suggestion = {
+      moduleName: "@/js-hyperclick",
+    }
+    const expected: Resolved = {
+      type: "file",
+      filename: path.join(__dirname, "../lib/js-hyperclick.js"),
+    }
+
+    const actual = resolveModule(__filename, suggestion, options)
+    expect(actual).toEqual(expected)
+  })
+
+  it("customResolver: alias this-directory", () => {
+    const suggestion = {
+      moduleName: "this-directory/parser-spec",
+    }
+    const expected: Resolved = {
+      type: "file",
+      filename: path.join(__dirname, "parser-spec.js"),
+    }
+
+    const actual = resolveModule(__filename, suggestion, options)
+    expect(actual).toEqual(expected)
+  })
+
+  it("customResolver: url-example", () => {
+    const suggestion = {
+      moduleName: "url-example",
+    }
+    const expected: Resolved = {
+      type: "url",
+      url: "https://atom.io/packages/js-hyperclick",
+    }
+
+    const actual = resolveModule(__filename, suggestion, options)
+    expect(actual).toEqual(expected)
+  })
+
+  it("customResolver: Meteor style absolute imports", () => {
+    const suggestion = {
+      moduleName: "/lib/js-hyperclick",
+    }
+    const expected: Resolved = {
+      type: "file",
+      filename: path.join(__dirname, "../lib/js-hyperclick.js"),
     }
 
     const actual = resolveModule(__filename, suggestion, options)

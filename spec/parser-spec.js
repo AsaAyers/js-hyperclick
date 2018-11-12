@@ -46,6 +46,10 @@ describe("parseCode", () => {
     const { code } = extractAnnotations("cjs.js")
     const info = parseCode(code)
 
+    if (info.type === "parse-error") {
+      throw new Error("unexpected parse error")
+    }
+
     const config = info.externalModules.find(i => i.local === "config")
     expect(config).toBeUndefined() // because it's a dynamic require
   })

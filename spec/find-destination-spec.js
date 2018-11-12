@@ -121,7 +121,7 @@ describe(`findDestination (all-imports.js)`, () => {
     const info = {}
 
     expect(() => {
-      // $FlowExpectError
+      // $FlowExpectError - Flow knows I'm passing the wrong type here
       findDestination(info, suggestion)
     }).toThrow("Invalid suggestion type")
   })
