@@ -1,5 +1,9 @@
 ## `master`
 
+## 1.15.x
+
+* Custom Resolvers. See [#105](https://github.com/AsaAyers/js-hyperclick/pull/105)
+
 ## 1.14.x
 
 * Upgrade to Babel 7
