@@ -24,6 +24,9 @@ const buildExpectations = srcFilename =>
         return buildSuggestion(info, text, { start, end })
       }
     }
+    const options = {
+      requireIfTrusted: require,
+    }
     spec.addMatchers({
       toLinkToExternalModuleLocation(endAnnotation) {
         const startAnnotation = this.actual
@@ -32,7 +35,7 @@ const buildExpectations = srcFilename =>
         let actual
         let destinationAnnotations = {}
         if (suggestion != null && suggestion.type === "from-import") {
-          const resolved = resolveModule(srcFilename, suggestion)
+          const resolved = resolveModule(srcFilename, suggestion, options)
 
           if (typeof resolved.filename !== "undefined") {
             const tmp = extractAnnotations(resolved.filename)
