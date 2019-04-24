@@ -1,5 +1,14 @@
 ## `master`
 
+## 1.17.0
+
+* Reject custom Babel6 configs
+* Prevent setting cwd on babel.config.js, it throws an error
+
+## 1.16.x
+
+* Fixed [#106](https://github.com/AsaAyers/js-hyperclick/issues/106) Use your project's Babel config if one is found
+
 ## 1.15.x
 
 * Custom Resolvers. See [#105](https://github.com/AsaAyers/js-hyperclick/pull/105)
