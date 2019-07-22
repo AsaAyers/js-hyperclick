@@ -1,5 +1,10 @@
 ## `master`
 
+## 1.19.0
+
+* Replaced the way I was loading Babel configs with `babel.loadPartialConfig`
+* Added a hyperclick priority configuration
+
 ## 1.17.0
 
 * Reject custom Babel6 configs
