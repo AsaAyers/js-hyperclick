@@ -65,6 +65,9 @@
     "resolve": "^1.10.1"
   },
   "devDependencies": {
+    "@types/atom": "^1.36.1",
+    "@types/debug": "^4.1.4",
+    "@types/resolve": "0.0.8",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.16.0",
     "flow-bin": "^0.86.0",
@@ -72,6 +75,7 @@
     "husky": "^0.13.3",
     "jest-diff": "^19.0.0",
     "lint-staged": "^3.4.0",
-    "prettier": "^1.17.0"
+    "prettier": "^1.17.0",
+    "typescript": "^3.5.3"
   }
 }

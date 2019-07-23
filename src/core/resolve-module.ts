@@ -1,20 +1,28 @@
-"use babel"
-// @flow
 import path from "path"
 import fs from "fs"
 import { sync as resolve } from "resolve"
-import type { Resolved } from "../types"
+import { Resolved } from "../ts-types"
 import makeDebug from "debug"
 const debug = makeDebug("js-hyperclick:resolve-module")
 
 // Default comes from Node's `require.extensions`
 const defaultExtensions = [".js", ".json", ".node"]
+
+type Resolver= (args: {
+  basedir: string,
+  moduleName: string
+}) => string | null | undefined
+
 type ResolveOptions = {
   extensions?: typeof defaultExtensions,
-  requireIfTrusted: (moduleName: string) => any,
+  requireIfTrusted: (moduleName: string) => Resolver,
 }
 
-function findPackageJson(basedir) {
+type PackageJson = {
+  moduleRoots: string | Array<string>
+}
+
+function findPackageJson(basedir: string): string | null {
   const packagePath = path.resolve(basedir, "package.json")
   try {
     fs.accessSync(packagePath)
@@ -23,17 +31,17 @@ function findPackageJson(basedir) {
     if (parent != basedir) {
       return findPackageJson(parent)
     }
-    return undefined
+    return null
   }
   return packagePath
 }
 
-function loadModuleRoots(basedir) {
+function loadModuleRoots(basedir: string) {
   const packagePath = findPackageJson(basedir)
   if (!packagePath) {
     return
   }
-  const config = JSON.parse(String(fs.readFileSync(packagePath)))
+  const config: PackageJson = JSON.parse(String(fs.readFileSync(packagePath)))
 
   if (config && config.moduleRoots) {
     let roots = config.moduleRoots
@@ -46,7 +54,8 @@ function loadModuleRoots(basedir) {
   }
 }
 
-function resolveWithCustomRoots(basedir, absoluteModule, options): Resolved {
+
+function resolveWithCustomRoots(basedir: string, absoluteModule: string, options: ResolveOptions): Resolved {
   const { extensions = defaultExtensions, requireIfTrusted } = options
   const moduleName = `./${absoluteModule}`
 
