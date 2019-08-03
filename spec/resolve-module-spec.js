@@ -2,8 +2,8 @@
 // @flow
 /* eslint-env jasmine */
 import path from "path"
-import { resolveModule } from "../lib/core"
-import type { Resolved } from "../lib/types"
+import { resolveModule } from "../dist/core"
+import type { Resolved } from "../dist/types"
 
 describe("resolveModule", () => {
   const options = {
@@ -125,7 +125,7 @@ describe("resolveModule", () => {
     }
     const expected: Resolved = {
       type: "file",
-      filename: path.join(__dirname, "../lib/core/parse-code.js"),
+      filename: path.join(__dirname, "../dist/core/parse-code.js"),
     }
 
     const actual = resolveModule(__filename, suggestion, options)
@@ -161,7 +161,7 @@ describe("resolveModule", () => {
     }
     const expected: Resolved = {
       type: "file",
-      filename: path.join(__dirname, "../lib/js-hyperclick.js"),
+      filename: path.join(__dirname, "../dist/js-hyperclick.js"),
     }
 
     const actual = resolveModule(__filename, suggestion, options)
@@ -196,11 +196,11 @@ describe("resolveModule", () => {
 
   it("customResolver: Meteor style absolute imports", () => {
     const suggestion = {
-      moduleName: "/lib/js-hyperclick",
+      moduleName: "/dist/js-hyperclick",
     }
     const expected: Resolved = {
       type: "file",
-      filename: path.join(__dirname, "../lib/js-hyperclick.js"),
+      filename: path.join(__dirname, "../dist/js-hyperclick.js"),
     }
 
     const actual = resolveModule(__filename, suggestion, options)

@@ -3,10 +3,11 @@
   "main": "./dist/js-hyperclick",
   "version": "1.19.0",
   "description": "A hyperclick provider that lets you jump to where variables are defined.",
+  "atomTestRunner": "./node_modules/atom-ts-spec-runner/runner.js",
   "keywords": [],
   "license": "MIT",
   "moduleRoots": [
-    "lib/core",
+    "dist/core",
     "custom-resolver.js"
   ],
   "engines": {
