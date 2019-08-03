@@ -11,6 +11,16 @@ export type Resolved =
   | { type: "url"; url: string }
   | { type: "file"; filename: string | null | undefined }
 
+type Resolver = (args: {
+  basedir: string
+  moduleName: string
+}) => string | null | undefined
+
+export interface ResolveOptions {
+  extensions?: string[]
+  requireIfTrusted: (moduleName: string) => Resolver
+}
+
 interface ParseError {
   type: "parse-error"
   parseError: Error

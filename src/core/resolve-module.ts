@@ -1,22 +1,12 @@
 import path from "path"
 import fs from "fs"
 import { sync as resolve } from "resolve"
-import { Resolved } from "../ts-types"
+import { Resolved, ResolveOptions, Suggestion } from "../ts-types"
 import makeDebug from "debug"
 const debug = makeDebug("js-hyperclick:resolve-module")
 
 // Default comes from Node's `require.extensions`
 const defaultExtensions = [".js", ".json", ".node"]
-
-type Resolver = (args: {
-  basedir: string
-  moduleName: string
-}) => string | null | undefined
-
-interface ResolveOptions {
-  extensions?: typeof defaultExtensions
-  requireIfTrusted: (moduleName: string) => Resolver
-}
 
 interface PackageJson {
   moduleRoots: string | string[]
@@ -122,10 +112,14 @@ function resolveWithCustomRoots(
 
 export default function resolveModule(
   filePath: string,
-  suggestion: { moduleName: string },
+  suggestion: Suggestion,
   options: ResolveOptions,
 ): Resolved {
   const { extensions = defaultExtensions } = options
+  if (suggestion.type === "binding") {
+    return { type: "file", filename: null }
+  }
+
   let { moduleName } = suggestion
 
   const basedir = path.dirname(filePath)
