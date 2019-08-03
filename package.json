@@ -66,6 +66,7 @@
   },
   "devDependencies": {
     "@types/atom": "^1.36.1",
+    "@types/babel__core": "^7.1.2",
     "@types/debug": "^4.1.4",
     "@types/resolve": "0.0.8",
     "babel-eslint": "^10.0.1",
