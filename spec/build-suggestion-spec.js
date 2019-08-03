@@ -1,7 +1,6 @@
 "use babel"
-// @flow
 /*eslint-env jasmine */
-import type { Suggestion } from "../dist/types"
+import { Suggestion } from "../dist/ts-types"
 import extractAnnotations from "./utils/extract-annotations"
 import findLocation from "./utils/find-location"
 import { parseCode, buildSuggestion, findDestination } from "../dist/core"
@@ -13,7 +12,7 @@ const buildExpectations = filename =>
     const spec = this
     const { code, annotations } = extractAnnotations(filename)
     const info = parseCode(code)
-    const runner = (name): ?Suggestion => {
+    const runner = (name): Suggestion | null => {
       if (annotations[name]) {
         const { text, start, end } = annotations[name]
         return buildSuggestion(info, text, { start, end })

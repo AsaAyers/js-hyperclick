@@ -1,5 +1,4 @@
 "use babel"
-// @flow
 /*eslint-env jasmine */
 import extractAnnotations from "./utils/extract-annotations"
 import { parseCode } from "../dist/core"

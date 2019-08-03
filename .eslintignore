@@ -1,1 +1,3 @@
 dist/
+# Anything that still has flow types must be ignored
+spec/fixtures

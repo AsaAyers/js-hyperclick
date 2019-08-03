@@ -1,9 +1,8 @@
 "use babel"
-// @flow
 /* eslint-env jasmine */
 import path from "path"
 import { resolveModule } from "../dist/core"
-import type { Resolved } from "../dist/types"
+import { Resolved } from "../dist/ts-types"
 
 describe("resolveModule", () => {
   const options = {
