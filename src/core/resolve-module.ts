@@ -8,18 +8,18 @@ const debug = makeDebug("js-hyperclick:resolve-module")
 // Default comes from Node's `require.extensions`
 const defaultExtensions = [".js", ".json", ".node"]
 
-type Resolver= (args: {
-  basedir: string,
+type Resolver = (args: {
+  basedir: string
   moduleName: string
 }) => string | null | undefined
 
-type ResolveOptions = {
-  extensions?: typeof defaultExtensions,
-  requireIfTrusted: (moduleName: string) => Resolver,
+interface ResolveOptions {
+  extensions?: typeof defaultExtensions
+  requireIfTrusted: (moduleName: string) => Resolver
 }
 
-type PackageJson = {
-  moduleRoots: string | Array<string>
+interface PackageJson {
+  moduleRoots: string | string[]
 }
 
 function findPackageJson(basedir: string): string | null {
@@ -54,8 +54,11 @@ function loadModuleRoots(basedir: string) {
   }
 }
 
-
-function resolveWithCustomRoots(basedir: string, absoluteModule: string, options: ResolveOptions): Resolved {
+function resolveWithCustomRoots(
+  basedir: string,
+  absoluteModule: string,
+  options: ResolveOptions,
+): Resolved {
   const { extensions = defaultExtensions, requireIfTrusted } = options
   const moduleName = `./${absoluteModule}`
 

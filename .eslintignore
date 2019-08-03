@@ -1,3 +1,3 @@
-lib/core/resolve-module.js
-lib/core/resolve-module.js
+lib/core/*
+lib/make-cache.js
 lib/ts-types.js

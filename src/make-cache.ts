@@ -10,9 +10,11 @@ const debug = makeDebug("js-hyperclick:make-cache")
 export default function cachedParser(subscriptions: CompositeDisposable) {
   const editors = new WeakMap()
   const data: WeakMap<TextEditor, Info> = new WeakMap()
-  const configCache: WeakMap<TextEditor, Object> = new WeakMap()
+  const configCache: WeakMap<TextEditor, babel.TransformOptions> = new WeakMap()
 
-  function loadBabelConfig(editor: TextEditor): babel.TransformOptions | undefined {
+  function loadBabelConfig(
+    editor: TextEditor,
+  ): babel.TransformOptions | undefined {
     const editorPath = editor.getPath()
     if (!configCache.has(editor) && editorPath != null) {
       const transformOptions: babel.TransformOptions = {

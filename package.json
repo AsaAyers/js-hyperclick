@@ -15,11 +15,17 @@
   "scripts": {
     "precommit": "lint-staged && npm test",
     "test": "atom --test spec/",
+    "lint": "eslint --ext js,ts src",
     "test-watch": "nodemon --exec 'npm test'"
   },
   "lint-staged": {
     "*.js": [
-      "prettier --write --no-semi --trailing-comma all",
+      "prettier --write",
+      "eslint",
+      "git add"
+    ],
+    "*.ts": [
+      "prettier --write",
       "eslint",
       "git add"
     ]
@@ -69,8 +75,11 @@
     "@types/babel__core": "^7.1.2",
     "@types/debug": "^4.1.4",
     "@types/resolve": "0.0.8",
+    "@typescript-eslint/eslint-plugin": "^1.13.0",
+    "@typescript-eslint/parser": "^1.13.0",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.16.0",
+    "eslint-config-prettier": "^6.0.0",
     "flow-bin": "^0.86.0",
     "flow-typed": "^2.5.1",
     "husky": "^0.13.3",

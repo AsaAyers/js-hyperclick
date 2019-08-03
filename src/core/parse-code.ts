@@ -1,7 +1,13 @@
 import { Info, ExternalModule, Path, Range } from "../ts-types"
 import makeDebug from "debug"
-import { parseSync, traverse, types as t, TransformOptions, ParseResult } from "@babel/core"
-import { TraverseOptions, Scope } from '@babel/traverse'
+import {
+  parseSync,
+  traverse,
+  types as t,
+  TransformOptions,
+  ParseResult,
+} from "@babel/core"
+import { TraverseOptions, Scope } from "@babel/traverse"
 
 const debug = makeDebug("js-hyperclick:parse-code")
 
@@ -11,25 +17,30 @@ export function toRange(start: number | null, end: number | null): Range {
   if (start != null && end != null) {
     return { start, end }
   }
-  debug('Missing location: $O', { start, end })
+  debug("Missing location: $O", { start, end })
   return { start: 0, end: 0 }
 }
 
 const identifierReducer = (
-  tmp: Array<t.Identifier>,
-  node: t.Node
-): Array<t.Identifier> => {
+  tmp: t.Identifier[],
+  node: t.Node,
+): t.Identifier[] => {
   let value = node
   // I don't know what this code is fror exactly, but TS doesn't like it.
   // @ts-ignore
-  if (node.value != null) { value = node.value }
+  if (node.value != null) {
+    // @ts-ignore
+    value = node.value
+  }
 
   let newIdentifiers
   if (t.isIdentifier(value)) {
     newIdentifiers = [value]
   } else if (t.isObjectPattern(value)) {
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
     newIdentifiers = findIdentifiers(value)
   } else if (t.isArrayPattern(value)) {
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
     newIdentifiers = findIdentifiers(value)
   }
 
@@ -41,10 +52,8 @@ const identifierReducer = (
 
   return [...tmp, ...newIdentifiers]
 }
-function findIdentifiers(
-  node: t.Node,
-  identifiers = []
-): Array<t.Identifier> {
+
+function findIdentifiers(node: t.Node, identifiers = []): t.Identifier[] {
   if (t.isObjectPattern(node)) {
     return node.properties.reduce(identifierReducer, identifiers)
   } else if (t.isArrayPattern(node)) {
@@ -95,7 +104,10 @@ const makeDefaultConfig = (): babel.TransformOptions => ({
   ],
 })
 
-export default function parseCode(code: string, babelConfig?: TransformOptions): Info {
+export default function parseCode(
+  code: string,
+  babelConfig?: TransformOptions,
+): Info {
   let ast: null | ParseResult = null
 
   try {
@@ -108,14 +120,18 @@ export default function parseCode(code: string, babelConfig?: TransformOptions):
 
   // console.log(JSON.stringify(ast, null, 4))
 
-  const scopes: Array<Scope> = []
-  const externalModules: Array<ExternalModule> = []
+  const scopes: Scope[] = []
+  const externalModules: ExternalModule[] = []
   const exports: { [name: string]: Range } = {}
-  const paths: Array<Path> = []
+  const paths: Path[] = []
 
-  const addModule = (moduleName: string, identifier: t.Identifier, imported = "default") => {
+  const addModule = (
+    moduleName: string,
+    identifier: t.Identifier,
+    imported = "default",
+  ) => {
     if (identifier.start == null || identifier.end == null) {
-      console.warn('Missing location?', identifier)
+      console.warn("Missing location?", identifier)
       return
     }
 
@@ -133,17 +149,14 @@ export default function parseCode(code: string, babelConfig?: TransformOptions):
     imported = identifier.name,
   ) => {
     if (identifier.start == null || identifier.end == null) {
-      console.warn('Missing location?', identifier)
+      console.warn("Missing location?", identifier)
       return
     }
 
     paths.push({
       imported,
       moduleName,
-      range: toRange(
-        identifier.start,
-        identifier.end,
-      ),
+      range: toRange(identifier.start, identifier.end),
     })
   }
 
@@ -177,13 +190,13 @@ export default function parseCode(code: string, babelConfig?: TransformOptions):
           // TODO: Clean this up. I was just following the types and ended up
           // with this mess.
           if (
-            t.isLiteral(arg)
-            && !t.isArrayExpression(arg)
-            && !t.isRegExpLiteral(arg)
-            && !t.isTemplateLiteral(arg)
-            && !t.isNullLiteral(arg)
-            && arg.value != null
-            && typeof arg.value === 'string'
+            t.isLiteral(arg) &&
+            !t.isArrayExpression(arg) &&
+            !t.isRegExpLiteral(arg) &&
+            !t.isTemplateLiteral(arg) &&
+            !t.isNullLiteral(arg) &&
+            arg.value != null &&
+            typeof arg.value === "string"
           ) {
             moduleName = arg.value
           }
@@ -207,10 +220,7 @@ export default function parseCode(code: string, babelConfig?: TransformOptions):
             paths.push({
               imported: "default",
               moduleName,
-              range: toRange(
-                node.arguments[0].start,
-                node.arguments[0].end,
-              ),
+              range: toRange(node.arguments[0].start, node.arguments[0].end),
             })
 
             if (t.isVariableDeclarator(parent)) {
@@ -227,7 +237,6 @@ export default function parseCode(code: string, babelConfig?: TransformOptions):
                 })
               }
             }
-
           }
         }
       }
@@ -235,7 +244,7 @@ export default function parseCode(code: string, babelConfig?: TransformOptions):
     ImportDeclaration({ node }) {
       if (t.isLiteral(node.source)) {
         const moduleName = node.source.value
-        node.specifiers.forEach((specifier) => {
+        node.specifiers.forEach(specifier => {
           // I dont' know why TS insists the types don't match.
           // Type 'import("<snip>js-hyperclick/node_modules/@types/babel__traverse/node_modules/@babel/types/lib/index").Identifier' is not assignable to type 'babel.types.Identifier'.
           // @ts-ignore
@@ -252,10 +261,7 @@ export default function parseCode(code: string, babelConfig?: TransformOptions):
         paths.push({
           imported: "default",
           moduleName,
-          range: toRange(
-            node.source.start,
-            node.source.end,
-          ),
+          range: toRange(node.source.start, node.source.end),
         })
       }
     },
@@ -263,24 +269,19 @@ export default function parseCode(code: string, babelConfig?: TransformOptions):
       const { declaration } = node
 
       if (t.isIdentifier(declaration)) {
-        exports.default = toRange(
-          declaration.start,
-          declaration.end,
-        )
+        exports.default = toRange(declaration.start, declaration.end)
         return
       }
 
-      exports.default = toRange(
-        node.start,
-        node.end,
-      )
+      exports.default = toRange(node.start, node.end)
     },
     ExportNamedDeclaration({ node }) {
       const { specifiers, declaration } = node
 
-      const moduleName = (node.source != null && t.isLiteral(node.source))
-        ? node.source.value
-        : undefined
+      const moduleName =
+        node.source != null && t.isLiteral(node.source)
+          ? node.source.value
+          : undefined
 
       specifiers.forEach(spec => {
         if (t.isExportSpecifier(spec)) {
@@ -309,10 +310,7 @@ export default function parseCode(code: string, babelConfig?: TransformOptions):
             paths.push({
               imported: "default",
               moduleName,
-              range: toRange(
-                spec.exported.start,
-                spec.exported.end,
-              ),
+              range: toRange(spec.exported.start, spec.exported.end),
             })
           }
         }
@@ -346,10 +344,7 @@ export default function parseCode(code: string, babelConfig?: TransformOptions):
         paths.push({
           imported: "default",
           moduleName,
-          range: toRange(
-            node.source.start,
-            node.source.end,
-          ),
+          range: toRange(node.source.start, node.source.end),
         })
       }
     },
@@ -359,19 +354,13 @@ export default function parseCode(code: string, babelConfig?: TransformOptions):
         paths.push({
           imported: "default",
           moduleName,
-          range: toRange(
-            node.source.start,
-            node.source.end,
-          ),
+          range: toRange(node.source.start, node.source.end),
         })
       }
     },
     AssignmentExpression({ node }) {
       if (t.isAssignmentExpression(node) && isModuleDotExports(node.left)) {
-        const range: Range  = toRange(
-          node.left.start,
-          node.left.end,
-        )
+        const range: Range = toRange(node.left.start, node.left.end)
         exports.default = range
       }
     },

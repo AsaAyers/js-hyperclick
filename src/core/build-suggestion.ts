@@ -1,12 +1,9 @@
 import { Info, Range, Suggestion, SuggestionOptions } from "../ts-types"
-import { Scope } from '@babel/traverse'
-import { toRange } from './parse-code'
+import { Scope } from "@babel/traverse"
+import { toRange } from "./parse-code"
 
-const scopeSize = ({ block: b }: Scope) => (
-  b.end != null &&
-  b.start != null &&
-  b.end - b.start
-) || 0
+const scopeSize = ({ block: b }: Scope) =>
+  (b.end != null && b.start != null && b.end - b.start) || 0
 
 function findClosestScope(scopes: Scope[], start: number, end: number) {
   return scopes.reduce((closest, scope) => {
@@ -68,7 +65,10 @@ export default function buildSuggestion(
     if (binding == null) {
       return null
     }
-    const { start: bindingStart, end: bindingEnd } = toRange(binding.identifier.start, binding.identifier.end)
+    const { start: bindingStart, end: bindingEnd } = toRange(
+      binding.identifier.start,
+      binding.identifier.end,
+    )
 
     const clickedDeclaration = bindingStart <= start && bindingEnd >= end
     const crossFiles = !options.jumpToImport
