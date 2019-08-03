@@ -1,3 +1,1 @@
-lib/core/*
-lib/make-cache.js
-lib/ts-types.js
+dist/

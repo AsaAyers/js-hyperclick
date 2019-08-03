@@ -1,6 +1,6 @@
 {
   "name": "js-hyperclick",
-  "main": "./lib/js-hyperclick",
+  "main": "./dist/js-hyperclick",
   "version": "1.19.0",
   "description": "A hyperclick provider that lets you jump to where variables are defined.",
   "keywords": [],
@@ -13,9 +13,10 @@
     "atom": ">=1.0.0 <2.0.0"
   },
   "scripts": {
-    "precommit": "lint-staged && npm test",
+    "precommit": "lint-staged && tsc && npm test",
     "test": "atom --test spec/",
     "lint": "eslint --ext js,ts src",
+    "type-check": "tsc --noEmit",
     "test-watch": "nodemon --exec 'npm test'"
   },
   "lint-staged": {
