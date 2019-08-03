@@ -1,14 +1,20 @@
-"use babel"
-// @flow
-import type { Info, Range, Suggestion, SuggestionOptions } from "../types"
+import { Info, Range, Suggestion, SuggestionOptions } from "../ts-types"
+import { Scope } from '@babel/traverse'
+import { toRange } from './parse-code'
 
-const scopeSize = ({ block: b }) => b.end - b.start
+const scopeSize = ({ block: b }: Scope) => (
+  b.end != null &&
+  b.start != null &&
+  b.end - b.start
+) || 0
 
-function findClosestScope(scopes, start, end) {
+function findClosestScope(scopes: Scope[], start: number, end: number) {
   return scopes.reduce((closest, scope) => {
     const { block } = scope
 
     if (
+      block.start != null &&
+      block.end != null &&
       block.start <= start &&
       block.end >= end &&
       scopeSize(scope) < scopeSize(closest)
@@ -25,7 +31,7 @@ export default function buildSuggestion(
   text: string,
   { start, end }: Range,
   options: SuggestionOptions = {},
-): ?Suggestion {
+): null | Suggestion {
   if (info.parseError) throw info.parseError
   const { paths, scopes, externalModules } = info
 
@@ -59,7 +65,10 @@ export default function buildSuggestion(
   // binding
   if (closestScope.hasBinding(text) && closestScope.getBinding(text)) {
     const binding = closestScope.getBinding(text)
-    const { start: bindingStart, end: bindingEnd } = binding.identifier
+    if (binding == null) {
+      return null
+    }
+    const { start: bindingStart, end: bindingEnd } = toRange(binding.identifier.start, binding.identifier.end)
 
     const clickedDeclaration = bindingStart <= start && bindingEnd >= end
     const crossFiles = !options.jumpToImport

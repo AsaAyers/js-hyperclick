@@ -4,8 +4,8 @@ import { Scope } from '@babel/traverse'
 // TODO: Remove the nulls. I just added them for compatibility with Babel's
 // Node.start and end.
 export type Range = {
-  start: number | null,
-  end: number | null,
+  start: number,
+  end: number,
 }
 
 export type Resolved =
@@ -70,3 +70,10 @@ export type Suggestion =
   | SuggestionFromImport
   | BindingSuggestion
   | PathSuggestion
+
+export type SuggestionOptions = {
+  // This can't be an exact type because buildSuggestion has a default value
+  // of `{}`. I don't know why Flow inists the two are incompatible when
+  // `jumpToImport` is optional.
+  jumpToImport?: boolean,
+}

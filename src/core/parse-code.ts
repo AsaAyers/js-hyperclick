@@ -7,6 +7,14 @@ const debug = makeDebug("js-hyperclick:parse-code")
 
 const parseErrorTag = Symbol()
 
+export function toRange(start: number | null, end: number | null): Range {
+  if (start != null && end != null) {
+    return { start, end }
+  }
+  debug('Missing location: $O', { start, end })
+  return { start: 0, end: 0 }
+}
+
 const identifierReducer = (
   tmp: Array<t.Identifier>,
   node: t.Node
@@ -132,10 +140,10 @@ export default function parseCode(code: string, babelConfig: TransformOptions): 
     paths.push({
       imported,
       moduleName,
-      range: {
-        start: identifier.start,
-        end: identifier.end,
-      },
+      range: toRange(
+        identifier.start,
+        identifier.end,
+      ),
     })
   }
 
@@ -199,10 +207,10 @@ export default function parseCode(code: string, babelConfig: TransformOptions): 
             paths.push({
               imported: "default",
               moduleName,
-              range: {
-                start: node.arguments[0].start,
-                end: node.arguments[0].end,
-              },
+              range: toRange(
+                node.arguments[0].start,
+                node.arguments[0].end,
+              ),
             })
 
             if (t.isVariableDeclarator(parent)) {
@@ -244,10 +252,10 @@ export default function parseCode(code: string, babelConfig: TransformOptions): 
         paths.push({
           imported: "default",
           moduleName,
-          range: {
-            start: node.source.start,
-            end: node.source.end,
-          },
+          range: toRange(
+            node.source.start,
+            node.source.end,
+          ),
         })
       }
     },
@@ -255,17 +263,17 @@ export default function parseCode(code: string, babelConfig: TransformOptions): 
       const { declaration } = node
 
       if (t.isIdentifier(declaration)) {
-        exports.default = {
-          start: declaration.start,
-          end: declaration.end,
-        }
+        exports.default = toRange(
+          declaration.start,
+          declaration.end,
+        )
         return
       }
 
-      exports.default = {
-        start: node.start,
-        end: node.end,
-      }
+      exports.default = toRange(
+        node.start,
+        node.end,
+      )
     },
     ExportNamedDeclaration({ node }) {
       const { specifiers, declaration } = node
@@ -277,7 +285,7 @@ export default function parseCode(code: string, babelConfig: TransformOptions): 
       specifiers.forEach(spec => {
         if (t.isExportSpecifier(spec)) {
           const { name, start, end } = spec.exported
-          exports[name] = { start, end }
+          exports[name] = toRange(start, end)
 
           // export ... from does not create a local binding, so I'm
           // gathering it in the paths. build-suggestion will convert
@@ -295,16 +303,16 @@ export default function parseCode(code: string, babelConfig: TransformOptions): 
           }
         } else if (t.isExportDefaultSpecifier(spec)) {
           const { name, start, end } = spec.exported
-          exports[name] = { start, end }
+          exports[name] = toRange(start, end)
 
           if (moduleName) {
             paths.push({
               imported: "default",
               moduleName,
-              range: {
-                start: spec.exported.start,
-                end: spec.exported.end,
-              },
+              range: toRange(
+                spec.exported.start,
+                spec.exported.end,
+              ),
             })
           }
         }
@@ -315,22 +323,22 @@ export default function parseCode(code: string, babelConfig: TransformOptions): 
           declaration.declarations.forEach(({ id }) => {
             declaration.declarations.forEach
             findIdentifiers(id).forEach(({ name, start, end }) => {
-              exports[name] = { start, end }
+              exports[name] = toRange(start, end)
             })
           })
         }
 
         if (t.isFunctionDeclaration(declaration) && declaration.id != null) {
           const { name, start, end } = declaration.id
-          exports[name] = { start, end }
+          exports[name] = toRange(start, end)
         }
         if (t.isTypeAlias(declaration)) {
           const { name, start, end } = declaration.id
-          exports[name] = { start, end }
+          exports[name] = toRange(start, end)
         }
         if (t.isInterfaceDeclaration(declaration)) {
           const { name, start, end } = declaration.id
-          exports[name] = { start, end }
+          exports[name] = toRange(start, end)
         }
       }
 
@@ -338,10 +346,10 @@ export default function parseCode(code: string, babelConfig: TransformOptions): 
         paths.push({
           imported: "default",
           moduleName,
-          range: {
-            start: node.source.start,
-            end: node.source.end,
-          },
+          range: toRange(
+            node.source.start,
+            node.source.end,
+          ),
         })
       }
     },
@@ -351,19 +359,19 @@ export default function parseCode(code: string, babelConfig: TransformOptions): 
         paths.push({
           imported: "default",
           moduleName,
-          range: {
-            start: node.source.start,
-            end: node.source.end,
-          },
+          range: toRange(
+            node.source.start,
+            node.source.end,
+          ),
         })
       }
     },
     AssignmentExpression({ node }) {
       if (t.isAssignmentExpression(node) && isModuleDotExports(node.left)) {
-        const range: Range  = {
-          start: node.left.start,
-          end: node.left.end,
-        }
+        const range: Range  = toRange(
+          node.left.start,
+          node.left.end,
+        )
         exports.default = range
       }
     },
