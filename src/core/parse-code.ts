@@ -56,7 +56,7 @@ function findIdentifiers(
   throw new Error("Unknown node type")
 }
 
-const makeDefaultConfig = () => ({
+const makeDefaultConfig = (): babel.TransformOptions => ({
   sourceType: "module",
   // Enable as many plugins as I can so that people don't need to configure
   // anything.
@@ -95,7 +95,7 @@ const makeDefaultConfig = () => ({
   ],
 })
 
-export default function parseCode(code: string, babelConfig: TransformOptions): Info {
+export default function parseCode(code: string, babelConfig?: TransformOptions): Info {
   let ast: null | ParseResult = null
 
   try {
