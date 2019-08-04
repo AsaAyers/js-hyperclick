@@ -1,12 +1,12 @@
 // All of these imports depend on the moduleRoots entry in package.json
 
-// This resolves using the "lib/core"
+// This resolves using the "dist/core"
 import "parse-code"
 
 // Everything below resolves using the `custom-resolver.js`
 
 // https://github.com/AsaAyers/js-hyperclick/issues/46
-import "/lib/js-hyperclick"
+import "/dist/js-hyperclick"
 // https://github.com/AsaAyers/js-hyperclick/issues/58
 import "@/js-hyperclick"
 

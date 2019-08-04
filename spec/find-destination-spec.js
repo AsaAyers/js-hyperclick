@@ -1,5 +1,4 @@
 "use babel"
-// @flow
 /* eslint-env jasmine */
 import path from "path"
 
@@ -10,7 +9,7 @@ import {
   buildSuggestion,
   resolveModule,
   findDestination,
-} from "../lib/core"
+} from "../dist/core"
 import matcherHint from "./utils/matcher-hint"
 
 const buildExpectations = srcFilename =>

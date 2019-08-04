@@ -1,11 +1,8 @@
-"use babel"
-// @flow
-
-import type { Info, Suggestion, Range } from "../types"
+import { Info, Suggestion, Range } from "../ts-types"
 
 export default function findDestination(
   info: Info,
-  suggestion: ?Suggestion,
+  suggestion?: Suggestion,
 ): Range {
   if (!suggestion) throw new Error("suggestion required")
   if (info.parseError) throw info.parseError

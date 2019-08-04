@@ -1,22 +1,29 @@
-"use babel"
 /*global atom */
-// @flow
-import type { TextEditor } from "atom"
-import type { Range, Resolved } from "./types"
+import { TextEditor } from "atom"
+import { Range, ResolveOptions, Suggestion } from "./ts-types"
 import createDebug from "debug"
 
 import { CompositeDisposable } from "atom"
 import { Range as AtomRange } from "atom"
+// @ts-ignore
 import shell from "shell"
 import makeCache from "./make-cache"
 import { buildSuggestion, findDestination, resolveModule } from "./core"
 import fs from "fs"
 import makeRequire from "./require-if-trusted"
-import type { Require } from "./require-if-trusted"
 
 const debug = createDebug("js-hyperclick")
 
-const scopes = ["source.js", "source.js.jsx", "javascript", "source.flow"]
+function exhaustiveCheck(_: never) {}
+
+const scopes = [
+  "source.js",
+  "source.js.jsx",
+  "javascript",
+  "source.flow",
+  "source.ts",
+  "source.tsx",
+]
 const isJavascript = (textEditor: TextEditor) => {
   const { scopeName } = textEditor.getGrammar()
 
@@ -27,11 +34,11 @@ const isJavascript = (textEditor: TextEditor) => {
   return false
 }
 
-function makeProvider(subscriptions) {
+function makeProvider(subscriptions: CompositeDisposable) {
   const cache = makeCache(subscriptions)
   let automaticJumpCounter = 0
 
-  const automaticJump = (textEditor, { start, end }: Range) => {
+  const automaticJump = (textEditor: TextEditor, { start, end }: Range) => {
     if (!atom.config.get("js-hyperclick.skipIntermediate")) {
       return
     }
@@ -68,6 +75,7 @@ function makeProvider(subscriptions) {
         return
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
       result = buildResult(textEditor, range, nextSuggestion, true)
     }
     if (result) {
@@ -75,7 +83,10 @@ function makeProvider(subscriptions) {
     }
   }
 
-  const navigateToSuggestion = (textEditor, suggestion) => {
+  const navigateToSuggestion = (
+    textEditor: TextEditor,
+    suggestion: Suggestion,
+  ) => {
     const info = cache.get(textEditor)
     const target = findDestination(info, suggestion)
 
@@ -89,19 +100,21 @@ function makeProvider(subscriptions) {
     }
   }
 
-  const followSuggestionPath = (fromFile, suggestion) => {
-    let blockNotFoundWarning = false
-    const requireIfTrusted: Require<() => ?Resolved> = makeRequire(
-      isTrusted => {
-        if (isTrusted) {
-          followSuggestionPath(fromFile, suggestion)
-        }
+  const followSuggestionPath = (fromFile: string, suggestion: Suggestion) => {
+    if (suggestion.type === "binding") {
+      return
+    }
 
-        blockNotFoundWarning = true
-        return () => undefined
-      },
-    )
-    const resolveOptions = {
+    let blockNotFoundWarning = false
+    const requireIfTrusted = makeRequire(isTrusted => {
+      if (isTrusted) {
+        followSuggestionPath(fromFile, suggestion)
+      }
+
+      blockNotFoundWarning = true
+      return () => undefined
+    })
+    const resolveOptions: ResolveOptions = {
       extensions: atom.config.get("js-hyperclick.extensions"),
       requireIfTrusted,
     }
@@ -133,24 +146,29 @@ function makeProvider(subscriptions) {
       const options = {
         pending: atom.config.get("js-hyperclick.usePendingPanes"),
       }
-      atom.workspace.open(filename, options).then(editor => {
+      const p = atom.workspace.open(filename, options) as Promise<TextEditor>
+      p.then((editor: TextEditor) => {
         navigateToSuggestion(editor, suggestion)
       })
     } else {
       // Verify all types have been handled
-      ;(resolved.type: empty)
+      exhaustiveCheck(resolved)
     }
   }
 
-  function buildResult(textEditor, range, suggestion, isAutomaticJump = true) {
+  function buildResult(
+    textEditor: TextEditor,
+    range: AtomRange,
+    suggestion: Suggestion,
+    isAutomaticJump = true,
+  ) {
     if (!isJavascript(textEditor)) {
       return
     }
-    if (suggestion.range) {
+    if (suggestion.type === "path") {
       const buffer = textEditor.getBuffer()
 
       range = new AtomRange(
-        // I know this works, but flow claims the type s wrong - $FlowFixMe
         buffer.positionForCharacterIndex(suggestion.range.start).toArray(),
         buffer.positionForCharacterIndex(suggestion.range.end).toArray(),
       )
@@ -166,7 +184,10 @@ function makeProvider(subscriptions) {
         if (suggestion.type === "binding") {
           navigateToSuggestion(textEditor, suggestion)
         } else {
-          followSuggestionPath(textEditor.getPath(), suggestion)
+          const editorPath = textEditor.getPath()
+          if (editorPath != null) {
+            followSuggestionPath(editorPath, suggestion)
+          }
         }
       },
     }
@@ -211,79 +232,82 @@ function migrateTrustedResolvers() {
   }
 }
 
-module.exports = {
-  config: {
-    extensions: {
-      description:
-        "Comma separated list of extensions to check for when a file isn't found",
-      type: "array",
-      // Default comes from Node's `require.extensions`
-      default: [".js", ".json", ".node"],
-      items: { type: "string" },
-    },
-    usePendingPanes: {
-      type: "boolean",
-      default: false,
-    },
-    jumpToImport: {
-      type: "boolean",
-      default: false,
-      description: `
+export const config = {
+  extensions: {
+    description:
+      "Comma separated list of extensions to check for when a file isn't found",
+    type: "array",
+    // Default comes from Node's `require.extensions`
+    default: [".js", ".json", ".node"],
+    items: { type: "string" },
+  },
+  usePendingPanes: {
+    type: "boolean",
+    default: false,
+  },
+  jumpToImport: {
+    type: "boolean",
+    default: false,
+    description: `
         Jump to the import statement instead of leaving the current file.
         You can still click the import to switch files.
         `.trim(), // if the description starts with whitespace it doesn't display
-    },
-    skipIntermediate: {
-      type: "boolean",
-      default: true,
-      title: `Jump through intermediate links`,
-      description: `
+  },
+  skipIntermediate: {
+    type: "boolean",
+    default: true,
+    title: `Jump through intermediate links`,
+    description: `
         When you land at your destination, js-hyperclick checks to see if
         that is a link and then follows it. This is mostly useful to skip
         over files that \`export ... from './otherfile'\`. You will land in
         \`./otherfile\` instead of at that export.
         `.trim(),
-    },
-    priority: {
-      type: "number",
-      default: 0,
-      title: `hyperclick priority`,
-      description: `
+  },
+  priority: {
+    type: "number",
+    default: 0,
+    title: `hyperclick priority`,
+    description: `
         Hyperclick only returns suggestions from a single provider, so this is a
         workaround for providers to override others. priority defaults to 0.
         https://atom.io/packages/hyperclick
         `.trim(),
-    },
-    // This doesn't show up in the settings. Use Edit > Config if you need to
-    // change this.
-    // trustedFiles: {
-    //   type: "array",
-    //   items: {
-    //     type: "object",
-    //     properties: {
-    //       hash: { type: "string" },
-    //       trusted: { type: "boolean" },
-    //     },
-    //   },
-    //   default: [],
-    // },
   },
-  activate() {
-    // hyperclick is bundled into nuclide
-    if (!atom.packages.isPackageLoaded("hyperclick")) {
-      require("atom-package-deps").install("js-hyperclick")
-    }
-    migrateTrustedResolvers()
-    debug("activate")
-    this.subscriptions = new CompositeDisposable()
-  },
-  getProvider() {
-    return makeProvider(this.subscriptions)
-  },
-  deactivate() {
-    debug("deactivate")
-    this.subscriptions.dispose()
-  },
+  // This doesn't show up in the settings. Use Edit > Config if you need to
+  // change this.
+  // trustedFiles: {
+  //   type: "array",
+  //   items: {
+  //     type: "object",
+  //     properties: {
+  //       hash: { type: "string" },
+  //       trusted: { type: "boolean" },
+  //     },
+  //   },
+  //   default: [],
+  // },
 }
 
-global.jsHyperclick = module.exports
+let subscriptions: CompositeDisposable | undefined
+
+export function activate() {
+  // hyperclick is bundled into nuclide
+  if (!atom.packages.isPackageLoaded("hyperclick")) {
+    require("atom-package-deps").install("js-hyperclick")
+  }
+  migrateTrustedResolvers()
+  debug("activate")
+  subscriptions = new CompositeDisposable()
+}
+export function getProvider() {
+  if (subscriptions != null) {
+    return makeProvider(subscriptions)
+  }
+}
+export function deactivate() {
+  debug("deactivate")
+  if (subscriptions != null) {
+    subscriptions.dispose()
+  }
+}

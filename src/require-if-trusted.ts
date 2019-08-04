@@ -1,4 +1,4 @@
-// @flow
+import { TextEditor } from "atom"
 import fs from "fs"
 import crypto from "crypto"
 import makeDebug from "debug"
@@ -12,9 +12,9 @@ const hashFile = (filename: string): string => {
   return String(hash.read())
 }
 
-const fileHashes = {}
+const fileHashes: { [filename: string]: string | undefined } = {}
 
-const hasChanged = (filename, hash) =>
+const hasChanged = (filename: string, hash: string) =>
   fileHashes[filename] != null && fileHashes[filename] != hash
 
 export type Fallback<T> = (trusted: boolean) => T
@@ -22,9 +22,14 @@ export type Fallback<T> = (trusted: boolean) => T
 export type Require<T> = (moduleName: string) => T
 
 const configKey = "js-hyperclick.trustedFiles"
-function updateTrust(hash, trusted) {
-  const trustedFiles = (atom.config.get(configKey) || []).filter(
-    tmp => tmp.hash !== hash,
+interface TrustedFile {
+  hash: string
+  trusted: boolean
+}
+
+function updateTrust(hash: string, trusted: boolean) {
+  const trustedFiles: TrustedFile[] = (atom.config.get(configKey) || []).filter(
+    (tmp: TrustedFile) => tmp.hash !== hash,
   )
 
   const newConfig = [...trustedFiles, { hash, trusted }]
@@ -33,7 +38,14 @@ function updateTrust(hash, trusted) {
   atom.config.set(configKey, newConfig)
 }
 
-function promptUser({ path, hash, lastHash, fallback }) {
+interface PromptArgs<T> {
+  path: string
+  hash: string
+  lastHash: string | undefined
+  fallback: Fallback<T>
+}
+
+function promptUser<T>({ path, hash, lastHash, fallback }: PromptArgs<T>) {
   const message = "js-hyperclick: Trust and execute this file?"
   let detail = `filename: ${path}\nhash: ${hash}`
 
@@ -46,7 +58,9 @@ function promptUser({ path, hash, lastHash, fallback }) {
   const options = {
     pending: atom.config.get("js-hyperclick.usePendingPanes"),
   }
-  const untrustedFile = atom.workspace.open(path, options)
+  const untrustedFile = atom.workspace.open(path, options) as Promise<
+    TextEditor
+  >
   const notification = atom.notifications.addInfo(message, {
     detail,
     dismissable: true,
@@ -63,6 +77,8 @@ function promptUser({ path, hash, lastHash, fallback }) {
           debug("Trust")
           fallback(true)
           untrustedFile.then(editor => {
+            // Maybe destroy is an undocumented API on a TextEditor?
+            // @ts-ignore
             editor.destroy()
           })
         },
@@ -80,14 +96,16 @@ function promptUser({ path, hash, lastHash, fallback }) {
 
 export default function makeRequire<T>(fallback: Fallback<T>): Require<T> {
   return function requireIfTrusted(path: string): T {
-    const trustedFiles = atom.config.get(configKey) || []
+    const trustedFiles: TrustedFile[] = atom.config.get(configKey) || []
 
     const hash = hashFile(path)
     // Originally I was going to store the filename and a hash
     // (trustedFiles[path][hash] = true), but using a config key
     // that contains a dot causes it to get broken up
     // (trustedFiles['some-path']['js'][hash] = true)
-    const { trusted } = trustedFiles.find(tmp => tmp.hash === hash) || {}
+    const { trusted } = trustedFiles.find(tmp => tmp.hash === hash) || {
+      trusted: null,
+    }
 
     const changed = hasChanged(path, hash)
     const lastHash = fileHashes[path]

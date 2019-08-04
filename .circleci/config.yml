@@ -17,28 +17,34 @@ jobs:
     # To see the list of pre-built images that CircleCI provides for most common
     # languages see https://circleci.com/docs/2.0/circleci-images/
     docker:
-    - image: circleci/node:latest
+      - image: circleci/node:latest
     steps:
-    - checkout
-    - run:
-        name: Update system package lists
-        command: sudo apt-get update
-    - run:
-        name: Install some pre-requisite packages
-        command: sudo apt-get --assume-yes --quiet install curl libxss1 libx11-xcb1 libasound2 xvfb
-        # NOTE: `libxss1 libx11-xcb1 libasound2` should be removed once atom/atom#16812 lands on stable
-    - run:
-        name: Start display server for Atom
-        command: /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1024x768x16 +extension RANDR
-        background: true
-    - run:
-        name: Download Atom build script
-        command: curl -s -O https://raw.githubusercontent.com/atom/ci/master/build-package.sh
-    - run:
-        name: Make build script executable
-        command: chmod u+x build-package.sh
-    - run:
-        name: Run package tests
-        command: ./build-package.sh
+      - checkout
+      - run:
+          name: Update system package lists
+          command: sudo apt-get update
+      - run:
+          name: Install some pre-requisite packages
+          command: sudo apt-get --assume-yes --quiet install curl libxss1 libx11-xcb1 libasound2 xvfb
+          # NOTE: `libxss1 libx11-xcb1 libasound2` should be removed once atom/atom#16812 lands on stable
+      - run:
+          name: Start display server for Atom
+          command: /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1024x768x16 +extension RANDR
+          background: true
+      - run:
+          name: Download Atom build script
+          command: curl -s -O https://raw.githubusercontent.com/atom/ci/master/build-package.sh
+      - run:
+          name: Make build script executable
+          command: chmod u+x build-package.sh
+      - run:
+          name: Run package tests
+          command: ./build-package.sh
+      - run:
+          name: Lint code
+          command: npm run lint
+      - run:
+          name: Type Check
+          command: npm run type-check
     # On MacOS:
     # - run: caffeinate -s build-package.sh

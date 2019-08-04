@@ -1,25 +1,25 @@
-"use babel"
-// @flow
-
 import path from "path"
-import type { CompositeDisposable, TextEditor } from "atom"
-import type { Info } from "./types"
+import { CompositeDisposable, TextEditor } from "atom"
+import { Info } from "./ts-types"
 import { parseCode } from "./core"
 import makeDebug from "debug"
+import * as babel from "@babel/core"
 
 const debug = makeDebug("js-hyperclick:make-cache")
 
 export default function cachedParser(subscriptions: CompositeDisposable) {
   const editors = new WeakMap()
   const data: WeakMap<TextEditor, Info> = new WeakMap()
-  const configCache: WeakMap<TextEditor, ?Object> = new WeakMap()
+  const configCache: WeakMap<TextEditor, babel.TransformOptions> = new WeakMap()
 
-  function loadBabelConfig(editor) {
-    if (!configCache.has(editor)) {
-      const babel = require("@babel/core")
-      const transformOptions = {
+  function loadBabelConfig(
+    editor: TextEditor,
+  ): babel.TransformOptions | undefined {
+    const editorPath = editor.getPath()
+    if (!configCache.has(editor) && editorPath != null) {
+      const transformOptions: babel.TransformOptions = {
         babelrc: true,
-        root: path.dirname(editor.getPath()),
+        root: path.dirname(editorPath),
         rootMode: "upward-optional",
         filename: editor.getPath(),
       }
@@ -29,8 +29,8 @@ export default function cachedParser(subscriptions: CompositeDisposable) {
 
         debug("Partial Config", partialConfig)
 
-        if (partialConfig.config == null) {
-          configCache.set(editor, undefined)
+        if (partialConfig == null || partialConfig.config == null) {
+          configCache.delete(editor)
         } else {
           configCache.set(editor, partialConfig.options)
         }
@@ -42,7 +42,7 @@ export default function cachedParser(subscriptions: CompositeDisposable) {
     return configCache.get(editor)
   }
 
-  function watchEditor(editor) {
+  function watchEditor(editor: TextEditor) {
     if (!editors.has(editor)) {
       editors.set(editor, null)
       subscriptions.add(
@@ -60,7 +60,7 @@ export default function cachedParser(subscriptions: CompositeDisposable) {
         data.set(editor, parseCode(editor.getText(), loadBabelConfig(editor)))
       }
 
-      // $FlowExpectError - Flow thinks it might return null here
+      // @ts-ignore - TS thinks it might return null here
       return data.get(editor)
     },
   }

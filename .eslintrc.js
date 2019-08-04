@@ -1,12 +1,22 @@
 module.exports = {
-  parser: "babel-eslint",
+  // parser: "babel-eslint",
+  parser: "@typescript-eslint/parser",
+  plugins: ["@typescript-eslint"],
   env: {
     es6: true,
     node: true,
   },
-  extends: "eslint:recommended",
+  extends: [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended",
+
+    "prettier",
+    "prettier/@typescript-eslint",
+  ],
   parserOptions: {
     sourceType: "module",
+    project: "./tsconfig.json",
     ecmaFeatures: {
       experimentalObjectRestSpread: true,
     },
@@ -15,18 +25,8 @@ module.exports = {
     atom: true,
   },
   rules: {
-    "comma-dangle": [0],
-    "no-this-before-super": [2],
-    "constructor-super": [2],
-    // prettier handles indentation, and they disagree on some of the code in
-    // find-destination-spec.jw
-    // indent: [2, 2],
-    "linebreak-style": [2, "unix"],
-    "no-var": [1],
-    "prefer-const": [1],
-    "no-const-assign": [2],
-    "no-unused-vars": [2],
-    semi: [2, "never"],
-    "no-extra-semi": [0],
+    "@typescript-eslint/explicit-function-return-type": 0,
+    "no-console": [1, { allow: ["warn", "error"] }],
+    "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
   },
 }

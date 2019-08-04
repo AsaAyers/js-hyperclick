@@ -1,32 +1,46 @@
-"use babel"
-// @flow
-import type { Info } from "../types"
+import { Info, ExternalModule, Path, Range } from "../ts-types"
 import makeDebug from "debug"
+import {
+  parseSync,
+  traverse,
+  types as t,
+  TransformOptions,
+  ParseResult,
+} from "@babel/core"
+import { TraverseOptions, Scope } from "@babel/traverse"
+
 const debug = makeDebug("js-hyperclick:parse-code")
-
-// TimeCop was reporting that it took over 600ms for js-hyperclick to start.
-// Converting this `import` to a `require` reduced it to under 250ms Moving it
-// to require inside `findIdentifiers` and `parseCode` moved it off the TimeCop
-// list (under 5ms)
-
-/*
-import { parse, traverse, types as t } from '@babel/core'
-*/
 
 const parseErrorTag = Symbol()
 
-const identifierReducer = (tmp, node) => {
+export function toRange(start: number | null, end: number | null): Range {
+  if (start != null && end != null) {
+    return { start, end }
+  }
+  debug("Missing location: $O", { start, end })
+  return { start: 0, end: 0 }
+}
+
+const identifierReducer = (
+  tmp: t.Identifier[],
+  node: t.Node,
+): t.Identifier[] => {
   let value = node
-  if (node.value) {
+  // I don't know what this code is fror exactly, but TS doesn't like it.
+  // @ts-ignore
+  if (node.value != null) {
+    // @ts-ignore
     value = node.value
   }
-  const { types: t } = require("@babel/core")
+
   let newIdentifiers
   if (t.isIdentifier(value)) {
     newIdentifiers = [value]
   } else if (t.isObjectPattern(value)) {
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
     newIdentifiers = findIdentifiers(value)
   } else if (t.isArrayPattern(value)) {
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
     newIdentifiers = findIdentifiers(value)
   }
 
@@ -38,9 +52,8 @@ const identifierReducer = (tmp, node) => {
 
   return [...tmp, ...newIdentifiers]
 }
-function findIdentifiers(node, identifiers = []) {
-  const { types: t } = require("@babel/core")
 
+function findIdentifiers(node: t.Node, identifiers = []): t.Identifier[] {
   if (t.isObjectPattern(node)) {
     return node.properties.reduce(identifierReducer, identifiers)
   } else if (t.isArrayPattern(node)) {
@@ -52,7 +65,7 @@ function findIdentifiers(node, identifiers = []) {
   throw new Error("Unknown node type")
 }
 
-const makeDefaultConfig = () => ({
+const makeDefaultConfig = (): babel.TransformOptions => ({
   sourceType: "module",
   // Enable as many plugins as I can so that people don't need to configure
   // anything.
@@ -91,10 +104,11 @@ const makeDefaultConfig = () => ({
   ],
 })
 
-export default function parseCode(code: string, babelConfig: ?Object): Info {
-  const { traverse, types: t } = require("@babel/core")
-  const { parseSync } = require("@babel/core")
-  let ast = undefined
+export default function parseCode(
+  code: string,
+  babelConfig?: TransformOptions,
+): Info {
+  let ast: null | ParseResult = null
 
   try {
     ast = parseSync(code, babelConfig || makeDefaultConfig())
@@ -106,12 +120,21 @@ export default function parseCode(code: string, babelConfig: ?Object): Info {
 
   // console.log(JSON.stringify(ast, null, 4))
 
-  const scopes = []
-  const externalModules = []
-  const exports = {}
-  const paths = []
+  const scopes: Scope[] = []
+  const externalModules: ExternalModule[] = []
+  const exports: { [name: string]: Range } = {}
+  const paths: Path[] = []
 
-  const addModule = (moduleName, identifier, imported = "default") => {
+  const addModule = (
+    moduleName: string,
+    identifier: t.Identifier,
+    imported = "default",
+  ) => {
+    if (identifier.start == null || identifier.end == null) {
+      console.warn("Missing location?", identifier)
+      return
+    }
+
     externalModules.push({
       local: identifier.name,
       start: identifier.start,
@@ -121,27 +144,29 @@ export default function parseCode(code: string, babelConfig: ?Object): Info {
     })
   }
   const addUnboundModule = (
-    moduleName,
-    identifier,
+    moduleName: string,
+    identifier: t.Identifier,
     imported = identifier.name,
   ) => {
+    if (identifier.start == null || identifier.end == null) {
+      console.warn("Missing location?", identifier)
+      return
+    }
+
     paths.push({
       imported,
       moduleName,
-      range: {
-        start: identifier.start,
-        end: identifier.end,
-      },
+      range: toRange(identifier.start, identifier.end),
     })
   }
 
-  const isModuleDotExports = node =>
+  const isModuleDotExports = (node: t.LVal): node is t.Identifier =>
     t.isMemberExpression(node) &&
     t.isIdentifier(node.object, { name: "module" }) &&
     t.isIdentifier(node.property, { name: "exports" })
 
-  const visitors = {
-    Scope({ scope }) {
+  const visitors: TraverseOptions = {
+    Scopable({ scope }) {
       scopes.push(scope)
     },
     CallExpression({ node, parent }) {
@@ -159,9 +184,20 @@ export default function parseCode(code: string, babelConfig: ?Object): Info {
 
       if (isImport || isRequire || isRequireResolve) {
         if (t.isLiteral(node.arguments[0])) {
-          let moduleName
+          let moduleName: null | string = null
           const arg = node.arguments[0]
-          if (t.isLiteral(arg)) {
+
+          // TODO: Clean this up. I was just following the types and ended up
+          // with this mess.
+          if (
+            t.isLiteral(arg) &&
+            !t.isArrayExpression(arg) &&
+            !t.isRegExpLiteral(arg) &&
+            !t.isTemplateLiteral(arg) &&
+            !t.isNullLiteral(arg) &&
+            arg.value != null &&
+            typeof arg.value === "string"
+          ) {
             moduleName = arg.value
           }
           if (
@@ -172,7 +208,6 @@ export default function parseCode(code: string, babelConfig: ?Object): Info {
             const quasi = arg.quasis[0]
             moduleName = quasi.value.cooked
           }
-          const { id } = parent
 
           if (moduleName != null) {
             if (
@@ -185,19 +220,22 @@ export default function parseCode(code: string, babelConfig: ?Object): Info {
             paths.push({
               imported: "default",
               moduleName,
-              range: {
-                start: node.arguments[0].start,
-                end: node.arguments[0].end,
-              },
+              range: toRange(node.arguments[0].start, node.arguments[0].end),
             })
 
-            if (t.isIdentifier(id)) {
-              addModule(moduleName, id)
-            }
-            if (t.isObjectPattern(id) || t.isArrayPattern(id)) {
-              findIdentifiers(id).forEach(identifier => {
-                addModule(moduleName, identifier)
-              })
+            if (t.isVariableDeclarator(parent)) {
+              const { id } = parent
+
+              if (t.isIdentifier(id)) {
+                addModule(moduleName, id)
+              }
+              if (t.isObjectPattern(id) || t.isArrayPattern(id)) {
+                // I had to add mName to make TypeScript happy. I'm not sure why.
+                const mName: string = moduleName
+                findIdentifiers(id).forEach(identifier => {
+                  addModule(mName, identifier)
+                })
+              }
             }
           }
         }
@@ -206,11 +244,16 @@ export default function parseCode(code: string, babelConfig: ?Object): Info {
     ImportDeclaration({ node }) {
       if (t.isLiteral(node.source)) {
         const moduleName = node.source.value
-        node.specifiers.forEach(({ local, imported }) => {
+        node.specifiers.forEach(specifier => {
+          // I dont' know why TS insists the types don't match.
+          // Type 'import("<snip>js-hyperclick/node_modules/@types/babel__traverse/node_modules/@babel/types/lib/index").Identifier' is not assignable to type 'babel.types.Identifier'.
+          // @ts-ignore
+          const local: t.Identifier = specifier.local
+
           let importedName = "default"
-          if (imported != null) {
-            addUnboundModule(moduleName, imported)
-            importedName = imported.name
+          if (t.isImportSpecifier(specifier)) {
+            addUnboundModule(moduleName, specifier.imported)
+            importedName = specifier.imported.name
           }
 
           addModule(moduleName, local, importedName)
@@ -218,10 +261,7 @@ export default function parseCode(code: string, babelConfig: ?Object): Info {
         paths.push({
           imported: "default",
           moduleName,
-          range: {
-            start: node.source.start,
-            end: node.source.end,
-          },
+          range: toRange(node.source.start, node.source.end),
         })
       }
     },
@@ -229,29 +269,24 @@ export default function parseCode(code: string, babelConfig: ?Object): Info {
       const { declaration } = node
 
       if (t.isIdentifier(declaration)) {
-        exports.default = {
-          start: declaration.start,
-          end: declaration.end,
-        }
+        exports.default = toRange(declaration.start, declaration.end)
         return
       }
 
-      exports.default = {
-        start: node.start,
-        end: node.end,
-      }
+      exports.default = toRange(node.start, node.end)
     },
     ExportNamedDeclaration({ node }) {
       const { specifiers, declaration } = node
 
-      const moduleName = t.isLiteral(node.source)
-        ? node.source.value
-        : undefined
+      const moduleName =
+        node.source != null && t.isLiteral(node.source)
+          ? node.source.value
+          : undefined
 
       specifiers.forEach(spec => {
         if (t.isExportSpecifier(spec)) {
           const { name, start, end } = spec.exported
-          exports[name] = { start, end }
+          exports[name] = toRange(start, end)
 
           // export ... from does not create a local binding, so I'm
           // gathering it in the paths. build-suggestion will convert
@@ -269,47 +304,47 @@ export default function parseCode(code: string, babelConfig: ?Object): Info {
           }
         } else if (t.isExportDefaultSpecifier(spec)) {
           const { name, start, end } = spec.exported
-          exports[name] = { start, end }
+          exports[name] = toRange(start, end)
 
           if (moduleName) {
             paths.push({
               imported: "default",
               moduleName,
-              range: {
-                start: spec.exported.start,
-                end: spec.exported.end,
-              },
+              range: toRange(spec.exported.start, spec.exported.end),
             })
           }
         }
       })
 
-      if (t.isVariableDeclaration(declaration)) {
-        declaration.declarations.forEach(({ id }) => {
-          declaration.declarations.forEach
-          findIdentifiers(id).forEach(({ name, start, end }) => {
-            exports[name] = { start, end }
+      if (declaration != null) {
+        if (t.isVariableDeclaration(declaration)) {
+          declaration.declarations.forEach(({ id }) => {
+            declaration.declarations.forEach
+            findIdentifiers(id).forEach(({ name, start, end }) => {
+              exports[name] = toRange(start, end)
+            })
           })
-        })
+        }
+
+        if (t.isFunctionDeclaration(declaration) && declaration.id != null) {
+          const { name, start, end } = declaration.id
+          exports[name] = toRange(start, end)
+        }
+        if (t.isTypeAlias(declaration)) {
+          const { name, start, end } = declaration.id
+          exports[name] = toRange(start, end)
+        }
+        if (t.isInterfaceDeclaration(declaration)) {
+          const { name, start, end } = declaration.id
+          exports[name] = toRange(start, end)
+        }
       }
 
-      if (
-        t.isFunctionDeclaration(declaration) ||
-        t.isTypeAlias(declaration) ||
-        t.isInterfaceDeclaration(declaration)
-      ) {
-        const { name, start, end } = declaration.id
-        exports[name] = { start, end }
-      }
-
-      if (moduleName) {
+      if (moduleName && node.source != null) {
         paths.push({
           imported: "default",
           moduleName,
-          range: {
-            start: node.source.start,
-            end: node.source.end,
-          },
+          range: toRange(node.source.start, node.source.end),
         })
       }
     },
@@ -319,25 +354,25 @@ export default function parseCode(code: string, babelConfig: ?Object): Info {
         paths.push({
           imported: "default",
           moduleName,
-          range: {
-            start: node.source.start,
-            end: node.source.end,
-          },
+          range: toRange(node.source.start, node.source.end),
         })
       }
     },
     AssignmentExpression({ node }) {
-      if (isModuleDotExports(node.left)) {
-        exports.default = {
-          start: node.left.start,
-          end: node.left.end,
-        }
+      if (t.isAssignmentExpression(node) && isModuleDotExports(node.left)) {
+        const range: Range = toRange(node.left.start, node.left.end)
+        exports.default = range
       }
     },
   }
 
   try {
-    traverse(ast, visitors)
+    if (ast != null) {
+      // I don't know why TS is complaining. `File | Program` are both types in
+      // the long list of things `traverse()` accepts.
+      // @ts-ignore.
+      traverse(ast, visitors)
+    }
   } catch (e) {
     debug("Error traversing", e)
     /* istanbul ignore else */

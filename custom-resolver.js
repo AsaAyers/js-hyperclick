@@ -22,7 +22,7 @@ export default function customResolver({ basedir, moduleName }) {
   if (prefix === "@") {
     // I think it's probably best to return an absolute path like this most of
     // the time.
-    return path.join(__dirname, "lib", rest.join("/"))
+    return path.join(__dirname, "dist", rest.join("/"))
   }
 
   // Meteor style imports. These are NOT node compatible because `/` is the root
